@@ -15,6 +15,7 @@ author = 'PyHC'
 # Extensions for Sphinx
 extensions = [
     'sphinx.ext.intersphinx',  # Enables linking to other projects
+    'sphinx_rtd_theme',
 ]
 
 # Template and static paths
@@ -31,7 +32,7 @@ intersphinx_mapping = {
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 # Theme options
-html_theme = 'alabaster'
+html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 
 # Additional configuration (optional)
