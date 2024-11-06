@@ -13,7 +13,7 @@ Below are the currently available packages in this hub. Click on a package name 
 - `pySPEDAS <https://pyspedas-copy.readthedocs.io/en/latest/>`_
 - `SunPy <https://sunpy-copy.readthedocs.io/en/stable/>`_
 
-This hub enables unified search functionality across these projects, making it easier to find information across multiple packages. Try it out in the search bar!
+This hub enables unified search functionality across these projects, making it easier to find information across multiple packages. *Try it out in the search bar!*
 
 Contents
 --------
