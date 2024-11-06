@@ -24,8 +24,8 @@ exclude_patterns = []
 
 # Intersphinx mappings for linking to PyHC subprojects
 intersphinx_mapping = {
-    'pysat': ('https://pysat.readthedocs.io/en/latest/', None),
-    'pyspedas': ('https://pyspedas.readthedocs.io/en/latest/', None),
+    'pysat-copy': ('https://pysat-copy.readthedocs.io/en/latest/', None),
+    'pyspedas-copy': ('https://pyspedas-copy.readthedocs.io/en/latest/', None),
 }
 
 # -- Options for HTML output -------------------------------------------------
