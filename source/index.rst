@@ -8,8 +8,8 @@ Available Packages
 
 Below are the currently available packages in this hub. Click on a package name to access its full documentation:
 
-- `pysat <https://pysat.readthedocs.io/en/latest/>`_
-- `pySPEDAS <https://pyspedas.readthedocs.io/en/latest/>`_
+- `pysat <https://pysat-copy.readthedocs.io/en/latest/>`_
+- `pySPEDAS <https://pyspedas-copy.readthedocs.io/en/latest/>`_
 
 This hub enables unified search functionality across these projects, making it easier to find information across multiple packages.
 
