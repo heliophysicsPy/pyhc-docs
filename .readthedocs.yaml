@@ -21,6 +21,6 @@ sphinx:
 #    - epub
 
 # Python dependencies required for building documentation
-# python:
-#    install:
-#    - requirements: requirements.txt
+python:
+   install:
+   - requirements: source/requirements.txt
