@@ -34,6 +34,7 @@ intersphinx_mapping = {
 # Theme options
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
+html_extra_path = ['_static/robots.txt']
 html_js_files = ['auto_check_search.js']
 
 
