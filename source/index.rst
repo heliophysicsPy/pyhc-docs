@@ -5,19 +5,6 @@ Welcome to the PyHC Documentation Hub! This is a centralized resource for search
 
 The Python in Heliophysics Community (PyHC) is a community-driven organization promoting the use and development of open source Python packages for solar physics, heliophysics, and space science. This hub allows you to search across all core PyHC packages to find the documentation you need.
 
-Search PyHC Documentation
--------------------------
-
-Use the search box below to search across all PyHC documentation:
-
-.. raw:: html
-
-   <div class="pyhc-search-container">
-      <input type="text" id="pyhc-search-input" placeholder="Search PyHC documentation..." aria-label="Search PyHC documentation">
-      <button id="pyhc-search-button" type="button">Search</button>
-   </div>
-   <div id="pyhc-search-results"></div>
-
 Available Packages
 ------------------
 
