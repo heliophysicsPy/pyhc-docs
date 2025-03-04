@@ -30,6 +30,7 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 html_extra_path = ['_static/robots.txt']
 html_js_files = ['pyhc_search.js']
+html_css_files = ['custom.css']
 
 html_theme_options = {
     'logo_only': False,
@@ -49,6 +50,11 @@ pyhc_projects = [
     'pyspedas',
     'plasmapy',
 ]
+
+# Make the project list available to the JavaScript
+html_context = {
+    'pyhc_projects': pyhc_projects
+}
 
 # Additional configuration (optional)
 # Add any additional options you may need here as the project expands.

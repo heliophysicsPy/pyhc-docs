@@ -5,20 +5,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const searchButton = document.getElementById('pyhc-search-button');
   const resultsContainer = document.getElementById('pyhc-search-results');
   
-  // Project configuration - these should match the list in conf.py
-  const projects = [
-    'sunpy',
-    'ndcube',
-    'pysat',
-    'pyspedas', 
-    'plasmapy'
-  ];
-
   // Base API URL
   const apiBaseUrl = 'https://readthedocs.org/api/v3/search/';
-  
-  // Format projects for query string
-  const projectsQuery = projects.map(project => `project:${project}`).join('+');
   
   // Event listeners for search
   if (searchInput && searchButton) {
@@ -33,6 +21,34 @@ document.addEventListener('DOMContentLoaded', function() {
     searchButton.addEventListener('click', performSearch);
   }
   
+  // Get the project array from the data attribute set by Sphinx template
+  function getProjects() {
+    const projectsScript = document.getElementById('pyhc-projects-data');
+    if (!projectsScript) {
+      console.error('Project data not found! Make sure pyhc_projects is defined in conf.py');
+      return [];
+    }
+    
+    try {
+      return JSON.parse(projectsScript.textContent);
+    } catch (e) {
+      console.error('Failed to parse project data:', e);
+      return [];
+    }
+  }
+  
+  // Create a properly formatted project query string with spaces
+  function getProjectsQuery() {
+    const projects = getProjects();
+    if (projects.length === 0) {
+      console.error('No projects defined for search');
+      return '';
+    }
+    
+    // Use spaces between project directives
+    return projects.map(project => `project:${project}`).join(' ');
+  }
+  
   // Perform the search
   function performSearch() {
     const query = searchInput.value.trim();
@@ -42,26 +58,40 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
     
+    // Get the project query string
+    const projectsQuery = getProjectsQuery();
+    if (!projectsQuery) {
+      showMessage('No projects defined for search. Please check your configuration.');
+      return;
+    }
+    
     // Show loading state
     showMessage('Searching...');
     
-    // Build the full query URL
-    const queryUrl = `${apiBaseUrl}?q=${encodeURIComponent(projectsQuery)}+${encodeURIComponent(query)}`;
+    // Build the full search query with space between project list and search term
+    const fullQuery = `${projectsQuery} ${query}`;
+    
+    // Build the URL with the correctly encoded query parameter
+    const queryUrl = `${apiBaseUrl}?q=${encodeURIComponent(fullQuery)}`;
+    
+    console.log('Search URL:', queryUrl);
+    console.log('Decoded URL:', apiBaseUrl + '?q=' + fullQuery);
     
     // Fetch results
     fetch(queryUrl)
       .then(response => {
         if (!response.ok) {
-          throw new Error('Network response was not ok');
+          throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
         }
         return response.json();
       })
       .then(data => {
+        console.log('Search response:', data);
         displayResults(data, query);
       })
       .catch(error => {
         console.error('Search error:', error);
-        showMessage('An error occurred while searching. Please try again later.');
+        showMessage(`An error occurred while searching: ${error.message}. Please try again later.`);
       });
   }
   
@@ -253,114 +283,4 @@ document.addEventListener('DOMContentLoaded', function() {
     div.textContent = text;
     return div.innerHTML;
   }
-});
-
-// Add styles for search UI
-document.addEventListener('DOMContentLoaded', function() {
-  // Create style element
-  const style = document.createElement('style');
-  style.textContent = `
-    .pyhc-search-container {
-      margin: 20px 0;
-      display: flex;
-      max-width: 600px;
-    }
-    
-    #pyhc-search-input {
-      flex: 1;
-      padding: 10px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 4px 0 0 4px;
-    }
-    
-    #pyhc-search-button {
-      background-color: #2980b9;
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      cursor: pointer;
-      font-size: 16px;
-      border-radius: 0 4px 4px 0;
-    }
-    
-    #pyhc-search-button:hover {
-      background-color: #3498db;
-    }
-    
-    #pyhc-search-results {
-      margin-top: 20px;
-    }
-    
-    .pyhc-result-item {
-      margin-bottom: 20px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid #eee;
-    }
-    
-    .pyhc-result-item h3 {
-      margin-bottom: 5px;
-    }
-    
-    .pyhc-result-project {
-      color: #555;
-      font-size: 14px;
-      margin-bottom: 10px;
-    }
-    
-    .pyhc-result-blocks {
-      margin-top: 10px;
-    }
-    
-    .pyhc-result-block {
-      margin-top: 8px;
-      background-color: #f9f9f9;
-      padding: 10px;
-      border-radius: 4px;
-    }
-    
-    .pyhc-block-title {
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-    
-    .pyhc-block-content {
-      font-size: 14px;
-      line-height: 1.4;
-    }
-    
-    .pyhc-pagination {
-      margin-top: 20px;
-    }
-    
-    .pyhc-load-more {
-      background-color: #2980b9;
-      color: white;
-      border: none;
-      padding: 8px 15px;
-      cursor: pointer;
-      font-size: 14px;
-      border-radius: 4px;
-    }
-    
-    .pyhc-load-more:hover {
-      background-color: #3498db;
-    }
-    
-    .pyhc-message {
-      padding: 10px;
-      background-color: #f9f9f9;
-      border-radius: 4px;
-    }
-    
-    /* Highlight styling */
-    span {
-      background-color: rgba(255, 255, 0, 0.3);
-      padding: 1px 2px;
-      border-radius: 2px;
-    }
-  `;
-  
-  // Add style to document
-  document.head.appendChild(style);
 });
