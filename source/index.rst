@@ -6,7 +6,7 @@ Welcome to the PyHC Documentation Hub! This is a centralized resource for search
 The Python in Heliophysics Community (PyHC) is a community-driven organization promoting the use and development of open source Python packages for solar physics, heliophysics, and space science. This hub allows you to search across all core PyHC packages to find the documentation you need.
 
 Search PyHC Documentation
-------------------------
+-------------------------
 
 Use the search box below to search across all PyHC documentation:
 
@@ -30,7 +30,7 @@ Below are the currently available packages in this hub. Click on a package name 
 - `PlasmaPy <https://docs.plasmapy.org/en/stable/>`_ - Plasma physics calculations and tools
 
 About PyHC
----------
+----------
 
 The `Python in Heliophysics Community (PyHC) <https://heliopython.org/>`_ is an organization focused on the development and use of open source Python tools for the heliophysics community. PyHC brings together developers and users working with Python in heliophysics to:
 
