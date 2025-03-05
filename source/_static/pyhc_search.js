@@ -128,8 +128,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Reset search icon to magnifying glass
         resetSearchIcon();
         
-        // Clear results
-        resultsContainer.innerHTML = '';
+        // Show recent searches
+        displayRecentSearches();
       });
     }
   }
@@ -207,10 +207,17 @@ document.addEventListener('DOMContentLoaded', function() {
     searchModal.style.display = 'block';
     searchInput.focus();
     
+    console.log('Opening search modal');
+    
     // If the RTD search input has a value, copy it
     if (rtdSearchInput && rtdSearchInput.value) {
       searchInput.value = rtdSearchInput.value;
+      console.log('RTD search input has value:', rtdSearchInput.value);
       performSearch();
+    } else {
+      // If no search term, show recent searches
+      console.log('No search term, showing recent searches');
+      displayRecentSearches();
     }
   }
   
@@ -248,6 +255,83 @@ document.addEventListener('DOMContentLoaded', function() {
     return projects.map(project => `project:${project}`).join(' ');
   }
   
+  // Store recently clicked search results
+  const recentSearches = {
+    searches: [],
+    
+    // Add a search result to recent searches
+    add: function(result) {
+      console.log('Adding to recent searches:', result);
+      
+      // Check if this result is already in recent searches
+      const exists = this.searches.findIndex(item => 
+        item.url === result.url && item.title === result.title
+      );
+      
+      // If it exists, remove it so we can add it to the top
+      if (exists !== -1) {
+        console.log('Found existing entry at index', exists, 'removing it');
+        this.searches.splice(exists, 1);
+      }
+      
+      // Add to the beginning of the array
+      this.searches.unshift(result);
+      console.log('Added to recent searches, new count:', this.searches.length);
+      
+      // Only keep the most recent 5 searches
+      if (this.searches.length > 5) {
+        this.searches.pop();
+      }
+      
+      // Save to localStorage
+      this.save();
+    },
+    
+    // Remove a search result from recent searches
+    remove: function(index) {
+      console.log('Removing recent search at index:', index);
+      if (index >= 0 && index < this.searches.length) {
+        this.searches.splice(index, 1);
+        this.save();
+        console.log('Removed, new count:', this.searches.length);
+      }
+    },
+    
+    // Save recent searches to localStorage
+    save: function() {
+      try {
+        localStorage.setItem('pyhc-recent-searches', JSON.stringify(this.searches));
+        console.log('Saved recent searches to localStorage');
+      } catch (e) {
+        console.error('Failed to save recent searches to localStorage:', e);
+      }
+    },
+    
+    // Load recent searches from localStorage
+    load: function() {
+      try {
+        const saved = localStorage.getItem('pyhc-recent-searches');
+        if (saved) {
+          this.searches = JSON.parse(saved);
+          console.log('Loaded', this.searches.length, 'recent searches from localStorage');
+          
+          // Debug: log loaded searches
+          this.searches.forEach((item, i) => {
+            console.log(`[${i}] ${item.title} - ${item.url}`);
+          });
+        } else {
+          console.log('No saved recent searches found');
+        }
+      } catch (e) {
+        console.error('Failed to load recent searches from localStorage:', e);
+        this.searches = [];
+      }
+    }
+  };
+  
+  // Load recent searches when the page loads
+  recentSearches.load();
+  
   // Perform the search
   function performSearch(fromDebounce = false) {
     const query = searchInput.value.trim();
@@ -255,7 +339,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!query) {
       // Reset search icon to magnifying glass
       resetSearchIcon();
-      showMessage('Please enter a search term.');
+      // Show recent searches
+      displayRecentSearches();
       return;
     }
     
@@ -263,8 +348,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (query.length < 3) {
       // Reset search icon to magnifying glass
       resetSearchIcon();
-      // Clear results
-      resultsContainer.innerHTML = '';
+      // Show recent searches
+      displayRecentSearches();
       return;
     }
     
@@ -311,6 +396,102 @@ document.addEventListener('DOMContentLoaded', function() {
         resetSearchIcon();
         showMessage(`An error occurred while searching: ${error.message}. Please try again later.`);
       });
+  }
+  
+  // Display recent searches
+  function displayRecentSearches() {
+    console.log('Displaying recent searches, count:', recentSearches.searches.length);
+    
+    // Add a test entry if none exist and we're in development
+    if (window.location.hostname === 'localhost' && (!recentSearches.searches || recentSearches.searches.length === 0)) {
+      console.log('Adding test recent search entry for development');
+      recentSearches.add({
+        title: 'Test Recent Search',
+        url: 'https://example.com/test',
+        project: 'test-project',
+        preview: 'This is a test recent search entry to verify the feature works correctly.'
+      });
+    }
+    
+    // If no recent searches, leave the results container empty
+    if (!recentSearches.searches || recentSearches.searches.length === 0) {
+      console.log('No recent searches to display');
+      resultsContainer.innerHTML = '';
+      return;
+    }
+    
+    // Clear previous results
+    resultsContainer.innerHTML = '';
+    
+    // Add the "Recent" header
+    const recentHeader = document.createElement('div');
+    recentHeader.className = 'project-header';
+    recentHeader.innerHTML = `
+      <h3>Recent:</h3>
+    `;
+    resultsContainer.appendChild(recentHeader);
+    
+    // Add each recent search
+    recentSearches.searches.forEach((search, index) => {
+      console.log('Rendering recent search item:', search);
+      const recentItem = document.createElement('div');
+      recentItem.className = 'hit-block';
+      
+      // Create the link to the search result
+      const link = document.createElement('a');
+      link.className = 'hit-block-heading';
+      link.href = search.url;
+      link.addEventListener('click', function(event) {
+        console.log('Recent search item clicked');
+        hideSearchModal(); // Close the modal when a result is clicked
+      });
+      
+      // Create the icon (clock for recent searches)
+      const icon = document.createElement('div');
+      icon.style.marginRight = '10px';
+      icon.innerHTML = `<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="clock-rotate-left" class="svg-inline--fa fa-clock-rotate-left header icon" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"></path></svg>`;
+      
+      // Create the title
+      const title = document.createElement('h2');
+      title.textContent = search.title;
+      
+      // Create the subtitle with project info
+      if (search.project) {
+        const subtitle = document.createElement('small');
+        subtitle.className = 'subtitle';
+        subtitle.textContent = ` (from project ${search.project})`;
+        title.appendChild(subtitle);
+      }
+      
+      // Create the close button
+      const closeButton = document.createElement('div');
+      closeButton.style.marginLeft = 'auto';
+      closeButton.style.cursor = 'pointer';
+      closeButton.innerHTML = `<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="circle-xmark" class="svg-inline--fa fa-circle-xmark" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM175 175c9.4-9.4 24.6-9.4 33.9 0l47 47 47-47c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-47 47 47 47c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-47-47-47 47c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l47-47-47-47c-9.4-9.4-9.4-24.6 0-33.9z"></path></svg>`;
+      closeButton.addEventListener('click', function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        recentSearches.remove(index);
+        displayRecentSearches();
+      });
+      
+      // Assemble the header
+      link.appendChild(icon);
+      link.appendChild(title);
+      link.appendChild(closeButton);
+      recentItem.appendChild(link);
+      
+      // Add content preview if available
+      if (search.preview) {
+        const preview = document.createElement('div');
+        preview.className = 'hit';
+        preview.innerHTML = `<p class="hit content">${search.preview}</p>`;
+        recentItem.appendChild(preview);
+      }
+      
+      resultsContainer.appendChild(recentItem);
+    });
   }
   
   // Display search results
@@ -411,8 +592,36 @@ document.addEventListener('DOMContentLoaded', function() {
     const headerLink = document.createElement('a');
     headerLink.className = 'hit-block-heading';
     headerLink.href = result.domain + result.path;
-    headerLink.addEventListener('click', function() {
-      hideSearchModal(); // Close the modal when a result is clicked
+    
+    // Fix: Use a proper protocol in the URL - check for http/https, add it if missing
+    const url = headerLink.href;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      headerLink.href = 'https://' + url;
+    }
+    
+    headerLink.addEventListener('click', function(event) {
+      // Save this result to recent searches
+      const searchResult = {
+        title: result.title,
+        url: headerLink.href, // Use the corrected URL with protocol
+        project: result.project.slug,
+        // Get a preview from the first highlight if available
+        preview: result.blocks && result.blocks.length > 0 && 
+                result.blocks[0].highlights && 
+                result.blocks[0].highlights.content && 
+                result.blocks[0].highlights.content.length > 0 ? 
+                result.blocks[0].highlights.content[0] : null
+      };
+      
+      console.log('Search result clicked, saving to recent searches:', searchResult);
+      
+      // Don't wait for event propagation, save right away
+      recentSearches.add(searchResult);
+      
+      // For middle click (new tab) do nothing, for left click close the modal
+      if (event.button === 0 && !event.ctrlKey && !event.metaKey) {
+        hideSearchModal(); // Close the modal when a result is clicked
+      }
     });
     
     // Create the icon
@@ -446,8 +655,30 @@ document.addEventListener('DOMContentLoaded', function() {
           const hitLink = document.createElement('a');
           hitLink.className = 'hit';
           hitLink.href = result.domain + result.path;
-          hitLink.addEventListener('click', function() {
-            hideSearchModal(); // Close the modal when a result is clicked
+          
+          // Fix: Use a proper protocol in the URL - check for http/https, add it if missing
+          const hitUrl = hitLink.href;
+          if (!hitUrl.startsWith('http://') && !hitUrl.startsWith('https://')) {
+            hitLink.href = 'https://' + hitUrl;
+          }
+          
+          hitLink.addEventListener('click', function(event) {
+            // Also save this result to recent searches when content blocks are clicked
+            const searchResult = {
+              title: result.title,
+              url: hitLink.href, // Use the corrected URL with protocol
+              project: result.project.slug,
+              preview: block.highlights.content[0]
+            };
+            console.log('Hit content clicked, saving to recent searches:', searchResult);
+            
+            // Don't wait for event propagation, save right away
+            recentSearches.add(searchResult);
+            
+            // For middle click (new tab) do nothing, for left click close the modal
+            if (event.button === 0 && !event.ctrlKey && !event.metaKey) {
+              hideSearchModal(); // Close the modal when a result is clicked
+            }
           });
           
           const hitContent = document.createElement('div');
