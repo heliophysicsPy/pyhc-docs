@@ -343,12 +343,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Create the title
     const title = document.createElement('h2');
-    // Use highlighted title if available, otherwise use regular title
-    if (result.highlights && result.highlights.title && result.highlights.title.length > 0) {
-      title.innerHTML = result.highlights.title[0];
-    } else {
-      title.textContent = result.title;
-    }
+    // Always use the plain text title without highlights for h2 elements
+    title.textContent = result.title;
     
     // Add subtitle with project info
     const subtitle = document.createElement('small');

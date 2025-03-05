@@ -310,7 +310,7 @@
   display: block !important; /* Override any flex display inheritance */
 }
 
-.hit span, .hit-block-heading h2 span {
+.hit span {
   font-weight: bold;
   font-style: italic;
   color: #2980b9;
@@ -320,7 +320,7 @@
   vertical-align: baseline;
 }
 
-.hit:hover span, .hit-block-heading:hover h2 span {
+.hit:hover span {
   color: #3091d1;
 }
 
