@@ -106,7 +106,7 @@
   border: 1px solid #ddd;
   border-radius: 4px;
   outline: none;
-  background: #fff;
+  background: #f5f5f5;
 }
 
 .pyhc-search-dialog input[type="search"]:focus {
