@@ -17,6 +17,10 @@ document.addEventListener('DOMContentLoaded', function() {
   const clearButton = document.getElementById('pyhc-search-clear');
   const resultsContainer = document.getElementById('pyhc-search-content');
   
+  // Debounce timer for real-time search
+  let searchDebounceTimer = null;
+  let searchIcon = null; // Will be set after modal creation
+
   // If the RTD search form exists, intercept it
   if (rtdSearchForm && rtdSearchInput) {
     // When user clicks on the search input, show our modal instead
@@ -35,6 +39,42 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Event listeners for search modal
   if (searchModal && searchInput) {
+    // Get reference to the search icon for state changes
+    searchIcon = document.querySelector('#pyhc-search-form label svg');
+    
+    // Real-time search with debounce
+    searchInput.addEventListener('input', function() {
+      const query = searchInput.value.trim();
+      
+      // Cancel any existing timer
+      if (searchDebounceTimer) {
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = null;
+      }
+      
+      // If query is too short, clear results and don't start search
+      if (query.length < 3) {
+        resetSearchIcon();
+        // Clear results if we had any
+        resultsContainer.innerHTML = '';
+        return;
+      }
+      
+      // Show loading state by changing icon to spinning circle notch
+      if (searchIcon) {
+        searchIcon.innerHTML = `<title id="svg-search-icon">Searching...</title>
+        <path d="M222.7 32.1c5 16.9-4.6 34.8-21.5 39.8C121.8 95.6 64 169.1 64 256c0 106 86 192 192 192s192-86 192-192c0-86.9-57.8-160.4-137.1-184.1c-16.9-5-26.6-22.9-21.5-39.8s22.9-26.6 39.8-21.5C434.9 42.1 512 140 512 256c0 141.4-114.6 256-256 256S0 397.4 0 256C0 140 77.1 42.1 182.9 10.6c16.9-5 34.8 4.6 39.8 21.5z"></path>`;
+        searchIcon.classList.add('fa-spin');
+      }
+      
+      // Set a 1 second timer - only for queries with 3+ characters
+      searchDebounceTimer = setTimeout(function() {
+        performSearch();
+        // Reset the timer
+        searchDebounceTimer = null;
+      }, 1000);
+    });
+    
     // Close modal when clicking outside the dialog
     searchModal.addEventListener('click', function(event) {
       if (event.target === searchModal) {
@@ -53,6 +93,13 @@ document.addEventListener('DOMContentLoaded', function() {
     searchInput.addEventListener('keydown', function(event) {
       if (event.key === 'Enter') {
         event.preventDefault(); // Prevent form submission
+        
+        // Cancel any pending debounce timer
+        if (searchDebounceTimer) {
+          clearTimeout(searchDebounceTimer);
+          searchDebounceTimer = null;
+        }
+        
         performSearch();
       }
     });
@@ -71,6 +118,18 @@ document.addEventListener('DOMContentLoaded', function() {
       clearButton.addEventListener('click', function() {
         searchInput.value = '';
         searchInput.focus();
+        
+        // Cancel any pending debounce timer
+        if (searchDebounceTimer) {
+          clearTimeout(searchDebounceTimer);
+          searchDebounceTimer = null;
+        }
+        
+        // Reset search icon to magnifying glass
+        resetSearchIcon();
+        
+        // Clear results
+        resultsContainer.innerHTML = '';
       });
     }
   }
@@ -194,13 +253,26 @@ document.addEventListener('DOMContentLoaded', function() {
     const query = searchInput.value.trim();
     
     if (!query) {
+      // Reset search icon to magnifying glass
+      resetSearchIcon();
       showMessage('Please enter a search term.');
+      return;
+    }
+    
+    // Check for minimum length
+    if (query.length < 3) {
+      // Reset search icon to magnifying glass
+      resetSearchIcon();
+      // Clear results
+      resultsContainer.innerHTML = '';
       return;
     }
     
     // Get the project query string
     const projectsQuery = getProjectsQuery();
     if (!projectsQuery) {
+      // Reset search icon to magnifying glass
+      resetSearchIcon();
       showMessage('No projects defined for search. Please check your configuration.');
       return;
     }
@@ -227,10 +299,14 @@ document.addEventListener('DOMContentLoaded', function() {
       })
       .then(data => {
         console.log('Search response:', data);
+        // Reset search icon to magnifying glass
+        resetSearchIcon();
         displayResults(data, query);
       })
       .catch(error => {
         console.error('Search error:', error);
+        // Reset search icon to magnifying glass
+        resetSearchIcon();
         showMessage(`An error occurred while searching: ${error.message}. Please try again later.`);
       });
   }
@@ -511,5 +587,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+  }
+  
+  // Reset search icon to the default magnifying glass
+  function resetSearchIcon() {
+    if (searchIcon) {
+      // Use the original magnifying glass icon from the search form creation
+      searchIcon.innerHTML = `<title id="svg-search-icon">Search</title>
+      <path fill="currentColor" d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"></path>`;
+      searchIcon.classList.remove('fa-spin');
+    }
   }
 });

@@ -74,6 +74,20 @@
   color: #777;
 }
 
+/* Add spinning animation for search icon */
+.pyhc-search-dialog svg.fa-spin {
+  animation: fa-spin 2s infinite linear;
+}
+
+@keyframes fa-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 .pyhc-search-dialog .clear-icon {
   position: absolute;
   right: 30px;
