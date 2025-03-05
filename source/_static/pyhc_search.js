@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Set a 1 second timer - only for queries with 3+ characters
       searchDebounceTimer = setTimeout(function() {
-        performSearch();
+        performSearch(true); // Pass true to indicate this is from the debounce timer
         // Reset the timer
         searchDebounceTimer = null;
       }, 1000);
@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
           searchDebounceTimer = null;
         }
         
-        performSearch();
+        performSearch(false); // This is a manual search, show the searching message
       }
     });
     
@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (searchForm) {
       searchForm.addEventListener('submit', function(event) {
         event.preventDefault(); // Prevent form submission
-        performSearch();
+        performSearch(false); // This is a manual search, show the searching message
       });
     }
     
@@ -249,7 +249,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   // Perform the search
-  function performSearch() {
+  function performSearch(fromDebounce = false) {
     const query = searchInput.value.trim();
     
     if (!query) {
@@ -277,8 +277,10 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
     
-    // Show loading state
-    showMessage('Searching...');
+    // Only show the loading message if this is not from the debounce timer
+    if (!fromDebounce) {
+      showMessage('Searching...');
+    }
     
     // Build the full search query with space between project list and search term
     const fullQuery = `${projectsQuery} ${query}`;
