@@ -315,6 +315,39 @@
   color: #3091d1;
 }
 
+/* Project Headers */
+.project-header {
+  display: flex;
+  align-items: center;
+  background-color: #f0f6fa;
+  padding: 12px 20px;
+  border-bottom: 1px solid #e1e4e5;
+  margin-top: 10px;
+}
+
+.project-header:first-child {
+  margin-top: 0;
+}
+
+.project-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: bold;
+  color: #2980b9;
+}
+
+.project-icon {
+  margin-right: 15px;
+  color: #2980b9;
+  display: flex;
+  align-items: center;
+}
+
+.project-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
 /* Messages */
 .pyhc-search-message {
   padding: 20px;

@@ -258,7 +258,20 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Process each project's results
     for (const [project, results] of Object.entries(resultsByProject)) {
-      // Just append each result - project info is now in each hit-block
+      // Add a project header section
+      const projectHeader = document.createElement('div');
+      projectHeader.className = 'project-header';
+      projectHeader.innerHTML = `
+        <div class="project-icon">
+          <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="book" class="svg-inline--fa fa-book" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+            <path fill="currentColor" d="M96 0C43 0 0 43 0 96V416c0 53 43 96 96 96H384h32c17.7 0 32-14.3 32-32s-14.3-32-32-32V384c17.7 0 32-14.3 32-32V32c0-17.7-14.3-32-32-32H384 96zm0 384H352v64H96c-17.7 0-32-14.3-32-32s14.3-32 32-32zm32-240c0-8.8 7.2-16 16-16H336c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16zm16 48H336c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16s7.2-16 16-16z"></path>
+          </svg>
+        </div>
+        <h3>Results from ${project}</h3>
+      `;
+      resultsContainer.appendChild(projectHeader);
+      
+      // Add each result for this project
       results.forEach(result => {
         const resultItem = createResultItem(result);
         resultsContainer.appendChild(resultItem);
@@ -413,6 +426,25 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Process each project's results
         for (const [project, results] of Object.entries(resultsByProject)) {
+          // Check if there's already a project header for this project
+          let projectHeader = Array.from(resultsContainer.querySelectorAll('.project-header h3'))
+            .find(h3 => h3.textContent === `Results from ${project}`)?.parentElement;
+          
+          // If not, create a new project header section
+          if (!projectHeader) {
+            projectHeader = document.createElement('div');
+            projectHeader.className = 'project-header';
+            projectHeader.innerHTML = `
+              <div class="project-icon">
+                <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="book" class="svg-inline--fa fa-book" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                  <path fill="currentColor" d="M96 0C43 0 0 43 0 96V416c0 53 43 96 96 96H384h32c17.7 0 32-14.3 32-32s-14.3-32-32-32V384c17.7 0 32-14.3 32-32V32c0-17.7-14.3-32-32-32H384 96zm0 384H352v64H96c-17.7 0-32-14.3-32-32s14.3-32 32-32zm32-240c0-8.8 7.2-16 16-16H336c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16zm16 48H336c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16s7.2-16 16-16z"></path>
+                </svg>
+              </div>
+              <h3>Results from ${project}</h3>
+            `;
+            resultsContainer.appendChild(projectHeader);
+          }
+          
           // Add each result for this project
           results.forEach(result => {
             const resultItem = createResultItem(result);
