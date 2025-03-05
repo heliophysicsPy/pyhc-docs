@@ -308,9 +308,11 @@
   cursor: pointer;
 }
 
-.hit:hover {
+.hit:hover, .hit.focused {
   background-color: #f5f5f5;
 }
+
+/* No outline for focused items - just use the same hover style */
 
 .hit .subheading {
   font-weight: bold;
@@ -337,7 +339,7 @@
   vertical-align: baseline;
 }
 
-.hit:hover span {
+.hit:hover span, .hit.focused span {
   color: #3091d1;
 }
 

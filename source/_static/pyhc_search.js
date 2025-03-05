@@ -82,16 +82,52 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
     
-    // ESC key to close modal
+    // Handle Up/Down/Enter/Escape keyboard navigation
     document.addEventListener('keydown', function(event) {
-      if (event.key === 'Escape' && searchModal.style.display === 'block') {
-        hideSearchModal();
+      // Only process keyboard events when the search modal is visible
+      if (searchModal.style.display !== 'block') {
+        return;
+      }
+      
+      switch (event.key) {
+        case 'Escape':
+          hideSearchModal();
+          break;
+          
+        case 'ArrowDown':
+          event.preventDefault();
+          navigateSearchResults('down');
+          break;
+          
+        case 'ArrowUp':
+          event.preventDefault();
+          navigateSearchResults('up');
+          break;
+          
+        case 'Enter':
+          // If a search result is focused, click it
+          const focusedElement = document.querySelector('.hit.focused');
+          if (focusedElement) {
+            event.preventDefault();
+            focusedElement.click();
+          } else if (document.activeElement === searchInput) {
+            event.preventDefault();
+            
+            // Cancel any pending debounce timer
+            if (searchDebounceTimer) {
+              clearTimeout(searchDebounceTimer);
+              searchDebounceTimer = null;
+            }
+            
+            performSearch(false); // This is a manual search, show the searching message
+          }
+          break;
       }
     });
     
     // Listen for Enter key in search input
     searchInput.addEventListener('keydown', function(event) {
-      if (event.key === 'Enter') {
+      if (event.key === 'Enter' && searchModal.style.display === 'block') {
         event.preventDefault(); // Prevent form submission
         
         // Cancel any pending debounce timer
@@ -841,6 +877,72 @@ document.addEventListener('DOMContentLoaded', function() {
       searchIcon.innerHTML = `<title id="svg-search-icon">Search</title>
       <path fill="currentColor" d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"></path>`;
       searchIcon.classList.remove('fa-spin');
+    }
+  }
+  
+  // Handle keyboard navigation through search results
+  function navigateSearchResults(direction) {
+    // Get only the top-level 'a.hit' elements, not any inner children or titles
+    // This ensures we only navigate between the main content items
+    const searchResults = Array.from(resultsContainer.querySelectorAll('a.hit'));
+    if (!searchResults.length) return;
+    
+    // Find currently focused element
+    const focusedElement = resultsContainer.querySelector('.hit.focused');
+    
+    // Clear all focused elements
+    searchResults.forEach(el => el.classList.remove('focused'));
+    
+    // Blur the search input to allow Enter key to work on focused items
+    searchInput.blur();
+    
+    // Determine which element to focus next
+    let nextIndex = 0;
+    
+    if (focusedElement) {
+      // Find index of currently focused element
+      const currentIndex = searchResults.indexOf(focusedElement);
+      
+      if (direction === 'down') {
+        // Move down (or wrap to top)
+        nextIndex = (currentIndex + 1) % searchResults.length;
+      } else if (direction === 'up') {
+        // Move up (or wrap to bottom)
+        nextIndex = (currentIndex - 1 + searchResults.length) % searchResults.length;
+      }
+    } else {
+      // No focused element yet
+      if (direction === 'down') {
+        nextIndex = 0; // Focus first element
+      } else if (direction === 'up') {
+        nextIndex = searchResults.length - 1; // Focus last element
+      }
+    }
+    
+    // Apply focus to the new element
+    if (searchResults[nextIndex]) {
+      const element = searchResults[nextIndex];
+      element.classList.add('focused');
+      
+      // Ensure the focused element is visible in the scrollable container
+      const container = resultsContainer;
+      
+      // Calculate element position relative to the container
+      const elementTop = element.offsetTop;
+      const elementBottom = elementTop + element.offsetHeight;
+      
+      // Get container's scroll position
+      const containerTop = container.scrollTop;
+      const containerBottom = containerTop + container.offsetHeight;
+      
+      // Scroll if the element is not fully visible
+      if (elementTop < containerTop) {
+        // Element is above the visible area - scroll up
+        container.scrollTop = elementTop - 20; // Add some padding
+      } else if (elementBottom > containerBottom) {
+        // Element is below the visible area - scroll down
+        container.scrollTop = elementBottom - container.offsetHeight + 20; // Add some padding
+      }
     }
   }
 });
