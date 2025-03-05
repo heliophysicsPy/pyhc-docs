@@ -52,11 +52,11 @@ document.addEventListener('DOMContentLoaded', function() {
         searchDebounceTimer = null;
       }
       
-      // If query is too short, clear results and don't start search
+      // If query is too short, show recent searches instead
       if (query.length < 3) {
         resetSearchIcon();
-        // Clear results if we had any
-        resultsContainer.innerHTML = '';
+        // Show recent searches
+        displayRecentSearches();
         return;
       }
       
@@ -484,10 +484,22 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Add content preview if available
       if (search.preview) {
-        const preview = document.createElement('div');
-        preview.className = 'hit';
-        preview.innerHTML = `<p class="hit content">${search.preview}</p>`;
-        recentItem.appendChild(preview);
+        // Create clickable preview section with same URL as the title
+        const previewLink = document.createElement('a');
+        previewLink.className = 'hit';
+        previewLink.href = search.url;
+        previewLink.innerHTML = `<p class="hit content">${search.preview}</p>`;
+        
+        // Add same click event as the title
+        previewLink.addEventListener('click', function(event) {
+          console.log('Recent search preview clicked');
+          // For middle click (new tab) do nothing, for left click close the modal
+          if (event.button === 0 && !event.ctrlKey && !event.metaKey) {
+            hideSearchModal(); // Close the modal when a result is clicked
+          }
+        });
+        
+        recentItem.appendChild(previewLink);
       }
       
       resultsContainer.appendChild(recentItem);
