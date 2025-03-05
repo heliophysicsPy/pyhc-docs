@@ -277,7 +277,8 @@
 }
 
 .hit-block-heading:hover {
-  background-color: #f9f9f9;
+  /* No hover background for title blocks */
+  background-color: transparent;
 }
 
 .hit-block-heading h2 {
