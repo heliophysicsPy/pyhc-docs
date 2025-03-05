@@ -314,8 +314,8 @@ document.addEventListener('DOMContentLoaded', function() {
       this.searches.unshift(result);
       console.log('Added to recent searches, new count:', this.searches.length);
       
-      // Only keep the most recent 5 searches
-      if (this.searches.length > 5) {
+      // Only keep the most recent 10 searches
+      if (this.searches.length > 10) {
         this.searches.pop();
       }
       
