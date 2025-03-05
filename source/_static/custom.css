@@ -116,6 +116,15 @@
   background-color: #f5f5f5;
 }
 
+.pyhc-search-dialog .no-results-footer {
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #666;
+}
+
 .pyhc-search-dialog .help {
   display: flex;
   list-style: none;
@@ -353,4 +362,80 @@
   padding: 20px;
   text-align: center;
   color: #666;
+}
+
+/* No Results Display */
+.no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px 20px;
+  text-align: center;
+}
+
+.no-results svg {
+  width: 65px;
+  height: 65px;
+  color: #777;
+  margin-bottom: 15px;
+}
+
+.no-results .title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 25px 0;
+  color: #333;
+}
+
+.no-results .tips {
+  max-width: 650px;
+  text-align: left;
+}
+
+.no-results .tips p {
+  margin: 0 0 15px 0;
+  color: #333;
+}
+
+.no-results .tips ul {
+  margin: 0 0 20px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.no-results .tips li {
+  margin-bottom: 15px;
+  line-height: 1.5;
+}
+
+.no-results .tips code {
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  padding: 2px 5px;
+  font-family: monospace;
+  font-size: 14px;
+}
+
+.no-results .tips strong {
+  font-weight: 600;
+}
+
+.no-results .footer {
+  font-size: 14px;
+  color: #555;
+  margin-top: 10px;
+}
+
+.no-results .footer p {
+  margin: 0;
+}
+
+.no-results .footer a {
+  color: #2980b9;
+  text-decoration: none;
+}
+
+.no-results .footer a:hover {
+  text-decoration: underline;
 }

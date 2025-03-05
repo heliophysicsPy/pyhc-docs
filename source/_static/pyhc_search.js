@@ -238,7 +238,40 @@ document.addEventListener('DOMContentLoaded', function() {
   // Display search results
   function displayResults(data, query) {
     if (!data.results || data.results.length === 0) {
-      showMessage(`No results found for "${query}".`);
+      // Show enhanced no results message with search tips
+      const noResultsHtml = `
+        <div class="no-results">
+          <svg aria-labelledby="svg-inline--fa-title-no-results" data-prefix="fas" data-icon="binoculars" class="svg-inline--fa fa-binoculars" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+            <title id="svg-inline--fa-title-no-results">Not found</title>
+            <path fill="currentColor" d="M128 32l32 0c17.7 0 32 14.3 32 32l0 32L96 96l0-32c0-17.7 14.3-32 32-32zm64 96l0 320c0 17.7-14.3 32-32 32L32 480c-17.7 0-32-14.3-32-32l0-59.1c0-34.6 9.4-68.6 27.2-98.3C40.9 267.8 49.7 242.4 53 216L60.5 156c2-16 15.6-28 31.8-28l99.8 0zm227.8 0c16.1 0 29.8 12 31.8 28L459 216c3.3 26.4 12.1 51.8 25.8 74.6c17.8 29.7 27.2 63.7 27.2 98.3l0 59.1c0 17.7-14.3 32-32 32l-128 0c-17.7 0-32-14.3-32-32l0-320 99.8 0zM320 64c0-17.7 14.3-32 32-32l32 0c17.7 0 32 14.3 32 32l0 32-96 0 0-32zm-32 64l0 160-64 0 0-160 64 0z"></path>
+          </svg>
+          <p class="title">No results for <strong>"${escapeHtml(query)}"</strong></p>
+          <div class="tips">
+            <p>Try using the following special queries:</p>
+            <ul>
+              <li>
+                <strong>Exact phrase</strong>: use double quotes to match a whole
+                phrase: <code>"adding a subproject"</code>.
+              </li>
+              <li>
+                <strong>Prefix</strong>: use an asterisk at the end of any term to
+                prefix a result: <code>environ*</code>.
+              </li>
+              <li>
+                <strong>Fuzziness</strong>: add a tilde and a number to indicate
+                the fuzziness of the word: <code>getter~2</code>.
+              </li>
+            </ul>
+          </div>
+          <div class="no-results-footer">
+            <p>
+              Learn more about the query syntax supported in our
+              <a target="_blank" href="https://docs.readthedocs.com/platform/stable/server-side-search/syntax.html">documentation</a>.
+            </p>
+          </div>
+        </div>
+      `;
+      resultsContainer.innerHTML = noResultsHtml;
       return;
     }
     
