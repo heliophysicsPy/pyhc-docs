@@ -18,7 +18,7 @@ The PyHC Documentation Hub leverages the Read The Docs Server-Side Search API to
 
 ## Development
 
-### Requirements
+### Python Requirements
 
 - Python 3.7+
 - Sphinx
