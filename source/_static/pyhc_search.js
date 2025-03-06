@@ -43,6 +43,15 @@ document.addEventListener('DOMContentLoaded', function() {
     searchIcon = document.querySelector('#pyhc-search-form label svg');
     
     // Real-time search with debounce
+    // Add focus/blur events to update help text visibility
+    searchInput.addEventListener('focus', function() {
+      updateHelpText();
+    });
+    
+    searchInput.addEventListener('blur', function() {
+      updateHelpText();
+    });
+    
     searchInput.addEventListener('input', function() {
       const query = searchInput.value.trim();
       
@@ -222,10 +231,10 @@ document.addEventListener('DOMContentLoaded', function() {
               </div>
               
               <div class="footer">
-                <ul class="help">
+                <ul class="help" id="pyhc-search-help">
                   <li><code>Enter</code> to select</li>
                   <li><code>Up</code>/<code>Down</code> to navigate results</li>
-                  <li><code>Left</code>/<code>Right</code> to switch tabs</li>
+                  <li id="tab-help-item" style="display: none;"><code>Left</code>/<code>Right</code> to switch tabs</li>
                   <li><code>Esc</code> to close</li>
                 </ul>
                 <div class="credits">
@@ -271,6 +280,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     searchModal.style.display = 'block';
     searchInput.focus();
+    
+    // Initialize help text (will hide tab navigation help when input has focus)
+    updateHelpText();
     
     console.log('Opening search modal');
     
@@ -467,6 +479,9 @@ document.addEventListener('DOMContentLoaded', function() {
   function displayRecentSearches() {
     console.log('Displaying recent searches, count:', recentSearches.searches.length);
     
+    // Update help text (hide tab navigation help for recent searches)
+    updateHelpText();
+    
     // Add a test entry if none exist and we're in development
     if (window.location.hostname === 'localhost' && (!recentSearches.searches || recentSearches.searches.length === 0)) {
       console.log('Adding test recent search entry for development');
@@ -573,6 +588,9 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Display search results
   function displayResults(data, query) {
+    // Update the help text
+    updateHelpText();
+    
     if (!data.results || data.results.length === 0) {
       // Show enhanced no results message with search tips
       const noResultsHtml = `
@@ -983,12 +1001,33 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
+  // Update the help text in the footer based on context
+  function updateHelpText() {
+    const tabHelpItem = document.getElementById('tab-help-item');
+    if (!tabHelpItem) return;
+    
+    // Show tab navigation help only when:
+    // 1. We're viewing search results (not recent searches)
+    // 2. The search input does not have focus
+    const isTabView = resultsContainer.querySelector('.project-tabs') !== null;
+    const searchInputHasFocus = document.activeElement === searchInput;
+    
+    if (isTabView && !searchInputHasFocus) {
+      tabHelpItem.style.display = 'list-item';
+    } else {
+      tabHelpItem.style.display = 'none';
+    }
+  }
+  
   // Handle keyboard navigation through search results
   function navigateSearchResults(direction) {
     // Check if we're in search results view with tabs or recent searches
     const isTabView = resultsContainer.querySelector('.project-tabs') !== null;
     let searchResults = [];
     let focusedElement = null;
+    
+    // Update help text when navigating
+    updateHelpText();
     
     if (isTabView) {
       // Get the active project results container
