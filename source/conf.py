@@ -6,7 +6,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'PyHC Documentation Hub'
-copyright = '2024, PyHC'
+copyright = '2025, PyHC'
 author = 'PyHC'
 
 # -- General configuration ---------------------------------------------------
@@ -45,10 +45,44 @@ html_theme_options = {
 # Define the PyHC projects to search
 pyhc_projects = [
     'sunpy',
-    'ndcube',
+    'plasmapy',
     'pysat',
     'pyspedas',
-    'plasmapy',
+    'aacgmv2',
+    'afino',
+    'aiapy',
+    'aidapy',
+    'amisrsynthdata',
+    'apexpy',
+    'ccsdspy',
+    'enlilviz',
+    'fiasco',
+    'gcmprocpy',
+    'geospacelab',
+    'hermes-core',
+    'irispy-lmsal',
+    'lofarsun',
+    'mcalf',
+    'ndcube',
+    'ocbpy',
+    'ommbv',
+    'pycdfpp',
+    'pydarn',
+    'pyflct',
+    'pyrfu',
+    'regularizepsf',
+    'sami2py',
+    'sammi',
+    'savic',
+    'solarmach',
+    'space-packet-parser',
+    'speasy',
+    'spiceypy',
+    'sunkit-image',
+    'sunkit-instruments',
+    'sunraster',
+    'viresclient',
+    'xrtpy',
 ]
 
 # Make the project list available to the JavaScript
