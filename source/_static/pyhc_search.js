@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
     
-    // Handle Up/Down/Enter/Escape keyboard navigation
+    // Handle Up/Down/Left/Right/Enter/Escape keyboard navigation
     document.addEventListener('keydown', function(event) {
       // Only process keyboard events when the search modal is visible
       if (searchModal.style.display !== 'block') {
@@ -104,9 +104,37 @@ document.addEventListener('DOMContentLoaded', function() {
           navigateSearchResults('up');
           break;
           
+        case 'ArrowLeft':
+          // Only handle left/right when not focused in search input
+          // and when in results view with tabs (not recent searches)
+          if (document.activeElement !== searchInput && resultsContainer.querySelector('.project-tabs')) {
+            event.preventDefault();
+            navigateTabs('left');
+          }
+          break;
+          
+        case 'ArrowRight':
+          // Only handle left/right when not focused in search input
+          // and when in results view with tabs (not recent searches)
+          if (document.activeElement !== searchInput && resultsContainer.querySelector('.project-tabs')) {
+            event.preventDefault();
+            navigateTabs('right');
+          }
+          break;
+          
         case 'Enter':
-          // If a search result is focused, click it
-          const focusedElement = document.querySelector('.hit.focused');
+          // Check if we're in tabbed search results or recent searches
+          const isTabView = resultsContainer.querySelector('.project-tabs') !== null;
+          let focusedElement = null;
+          
+          if (isTabView) {
+            // Check for focused element in active tab
+            focusedElement = document.querySelector('.project-results.active .hit.focused');
+          } else {
+            // Check for focused element in recent searches
+            focusedElement = document.querySelector('.hit.focused');
+          }
+          
           if (focusedElement) {
             event.preventDefault();
             focusedElement.click();
@@ -196,7 +224,8 @@ document.addEventListener('DOMContentLoaded', function() {
               <div class="footer">
                 <ul class="help">
                   <li><code>Enter</code> to select</li>
-                  <li><code>Up</code>/<code>Down</code> to navigate</li>
+                  <li><code>Up</code>/<code>Down</code> to navigate results</li>
+                  <li><code>Left</code>/<code>Right</code> to switch tabs</li>
                   <li><code>Esc</code> to close</li>
                 </ul>
                 <div class="credits">
@@ -596,26 +625,60 @@ document.addEventListener('DOMContentLoaded', function() {
       resultsByProject[projectSlug].push(result);
     });
     
-    // Process each project's results
+    // Create tab container
+    const tabsContainer = document.createElement('div');
+    tabsContainer.className = 'project-tabs';
+    resultsContainer.appendChild(tabsContainer);
+    
+    // Create results containers (one for each project)
+    const resultsContainers = {};
+    
+    // Process each project to create tabs and containers
+    let isFirstProject = true;
     for (const [project, results] of Object.entries(resultsByProject)) {
-      // Add a project header section
-      const projectHeader = document.createElement('div');
-      projectHeader.className = 'project-header';
-      projectHeader.innerHTML = `
-        <div class="project-icon">
+      // Create the tab for this project
+      const tab = document.createElement('div');
+      tab.className = `project-tab${isFirstProject ? ' active' : ''}`;
+      tab.dataset.project = project;
+      tab.innerHTML = `
+        <div class="project-tab-icon">
           <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="book" class="svg-inline--fa fa-book" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
             <path fill="currentColor" d="M96 0C43 0 0 43 0 96V416c0 53 43 96 96 96H384h32c17.7 0 32-14.3 32-32s-14.3-32-32-32V384c17.7 0 32-14.3 32-32V32c0-17.7-14.3-32-32-32H384 96zm0 384H352v64H96c-17.7 0-32-14.3-32-32s14.3-32 32-32zm32-240c0-8.8 7.2-16 16-16H336c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16zm16 48H336c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16s7.2-16 16-16z"></path>
           </svg>
         </div>
-        <h3>Results from ${project}</h3>
+        ${project} (${results.length})
       `;
-      resultsContainer.appendChild(projectHeader);
       
-      // Add each result for this project
+      // Add click handler to switch tabs
+      tab.addEventListener('click', function() {
+        // Remove active class from all tabs and containers
+        document.querySelectorAll('.project-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.project-results').forEach(c => c.classList.remove('active'));
+        
+        // Add active class to this tab and its container
+        tab.classList.add('active');
+        resultsContainers[project].classList.add('active');
+      });
+      
+      tabsContainer.appendChild(tab);
+      
+      // Create a container for this project's results
+      const projectResultsContainer = document.createElement('div');
+      projectResultsContainer.className = `project-results${isFirstProject ? ' active' : ''}`;
+      projectResultsContainer.dataset.project = project;
+      resultsContainer.appendChild(projectResultsContainer);
+      
+      // Store reference to this container
+      resultsContainers[project] = projectResultsContainer;
+      
+      // Add each result for this project to its container
       results.forEach(result => {
         const resultItem = createResultItem(result);
-        resultsContainer.appendChild(resultItem);
+        projectResultsContainer.appendChild(resultItem);
       });
+      
+      // Only the first project should be active by default
+      isFirstProject = false;
     }
     
     // Add pagination if needed
@@ -810,31 +873,71 @@ document.addEventListener('DOMContentLoaded', function() {
           resultsByProject[projectSlug].push(result);
         });
         
+        // Get existing project tabs container
+        const tabsContainer = resultsContainer.querySelector('.project-tabs');
+        
         // Process each project's results
         for (const [project, results] of Object.entries(resultsByProject)) {
-          // Check if there's already a project header for this project
-          let projectHeader = Array.from(resultsContainer.querySelectorAll('.project-header h3'))
-            .find(h3 => h3.textContent === `Results from ${project}`)?.parentElement;
+          // Check if there's already a container for this project
+          let projectContainer = resultsContainer.querySelector(`.project-results[data-project="${project}"]`);
           
-          // If not, create a new project header section
-          if (!projectHeader) {
-            projectHeader = document.createElement('div');
-            projectHeader.className = 'project-header';
-            projectHeader.innerHTML = `
-              <div class="project-icon">
+          // If there's no tab for this project yet, create it
+          if (!projectContainer) {
+            // Create a new tab for this project
+            const tab = document.createElement('div');
+            tab.className = 'project-tab';
+            tab.dataset.project = project;
+            tab.innerHTML = `
+              <div class="project-tab-icon">
                 <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="book" class="svg-inline--fa fa-book" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
                   <path fill="currentColor" d="M96 0C43 0 0 43 0 96V416c0 53 43 96 96 96H384h32c17.7 0 32-14.3 32-32s-14.3-32-32-32V384c17.7 0 32-14.3 32-32V32c0-17.7-14.3-32-32-32H384 96zm0 384H352v64H96c-17.7 0-32-14.3-32-32s14.3-32 32-32zm32-240c0-8.8 7.2-16 16-16H336c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16zm16 48H336c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16s7.2-16 16-16z"></path>
                 </svg>
               </div>
-              <h3>Results from ${project}</h3>
+              ${project} (${results.length})
             `;
-            resultsContainer.appendChild(projectHeader);
+            
+            // Add tab click handler
+            tab.addEventListener('click', function() {
+              // Remove active class from all tabs and containers
+              document.querySelectorAll('.project-tab').forEach(t => t.classList.remove('active'));
+              document.querySelectorAll('.project-results').forEach(c => c.classList.remove('active'));
+              
+              // Add active class to this tab and its container
+              tab.classList.add('active');
+              const container = resultsContainer.querySelector(`.project-results[data-project="${project}"]`);
+              if (container) container.classList.add('active');
+            });
+            
+            tabsContainer.appendChild(tab);
+            
+            // Create a new container for this project
+            projectContainer = document.createElement('div');
+            projectContainer.className = 'project-results';
+            projectContainer.dataset.project = project;
+            
+            // Find the load more button to insert before it (if it exists)
+            const loadMoreBtn = resultsContainer.querySelector('.pyhc-load-more');
+            if (loadMoreBtn) {
+              resultsContainer.insertBefore(projectContainer, loadMoreBtn);
+            } else {
+              resultsContainer.appendChild(projectContainer);
+            }
+          } else {
+            // If this project already exists, update the count in the tab
+            const projectTab = tabsContainer.querySelector(`.project-tab[data-project="${project}"]`);
+            if (projectTab) {
+              // Get current count from tab
+              const currentCount = parseInt(projectTab.innerText.match(/\((\d+)\)/)[1]);
+              // Update tab text with new count
+              const newCount = currentCount + results.length;
+              projectTab.innerHTML = projectTab.innerHTML.replace(/\(\d+\)/, `(${newCount})`);
+            }
           }
           
-          // Add each result for this project
+          // Add each result for this project to its container
           results.forEach(result => {
             const resultItem = createResultItem(result);
-            resultsContainer.appendChild(resultItem);
+            projectContainer.appendChild(resultItem);
           });
         }
         
@@ -882,13 +985,30 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Handle keyboard navigation through search results
   function navigateSearchResults(direction) {
-    // Get only the top-level 'a.hit' elements, not any inner children or titles
-    // This ensures we only navigate between the main content items
-    const searchResults = Array.from(resultsContainer.querySelectorAll('a.hit'));
-    if (!searchResults.length) return;
+    // Check if we're in search results view with tabs or recent searches
+    const isTabView = resultsContainer.querySelector('.project-tabs') !== null;
+    let searchResults = [];
+    let focusedElement = null;
     
-    // Find currently focused element
-    const focusedElement = resultsContainer.querySelector('.hit.focused');
+    if (isTabView) {
+      // Get the active project results container
+      const activeContainer = resultsContainer.querySelector('.project-results.active');
+      if (!activeContainer) return;
+      
+      // Get only the top-level 'a.hit' elements in the active container
+      searchResults = Array.from(activeContainer.querySelectorAll('a.hit'));
+      // Find currently focused element
+      focusedElement = activeContainer.querySelector('.hit.focused');
+    } else {
+      // Recent searches view
+      // Get hit elements from recent searches
+      searchResults = Array.from(resultsContainer.querySelectorAll('a.hit'));
+      // Find currently focused element
+      focusedElement = resultsContainer.querySelector('.hit.focused');
+    }
+    
+    // If no results, exit early
+    if (!searchResults.length) return;
     
     // Clear all focused elements
     searchResults.forEach(el => el.classList.remove('focused'));
@@ -943,6 +1063,34 @@ document.addEventListener('DOMContentLoaded', function() {
         // Element is below the visible area - scroll down
         container.scrollTop = elementBottom - container.offsetHeight + 20; // Add some padding
       }
+    }
+  }
+  
+  // Add left/right arrow navigation between tabs
+  function navigateTabs(direction) {
+    const tabs = Array.from(resultsContainer.querySelectorAll('.project-tab'));
+    if (!tabs.length) return;
+    
+    // Find the currently active tab
+    const activeTab = resultsContainer.querySelector('.project-tab.active');
+    if (!activeTab) return;
+    
+    // Find the index of the active tab
+    const currentIndex = tabs.indexOf(activeTab);
+    
+    // Determine the next tab based on direction
+    let nextIndex;
+    if (direction === 'left') {
+      // Move left (or wrap to rightmost)
+      nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+    } else if (direction === 'right') {
+      // Move right (or wrap to leftmost)
+      nextIndex = (currentIndex + 1) % tabs.length;
+    }
+    
+    // Simulate a click on the next tab
+    if (tabs[nextIndex]) {
+      tabs[nextIndex].click();
     }
   }
 });

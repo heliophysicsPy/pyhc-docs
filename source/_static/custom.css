@@ -16,7 +16,7 @@
 .pyhc-search-dialog {
   position: relative;
   width: 90%;
-  max-width: 800px;
+  /* max-width: 800px; */  /* Leave commented for future reference */
   margin: 80px auto;
   background-color: white;
   border-radius: 5px;
@@ -343,7 +343,58 @@
   color: #3091d1;
 }
 
-/* Project Headers */
+/* Project Tabs */
+.project-tabs {
+  display: flex;
+  border-bottom: 1px solid #e1e4e5;
+  background-color: #f0f6fa;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+.project-tab {
+  padding: 12px 20px;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  color: #666;
+  position: relative;
+  border-bottom: 3px solid transparent;
+}
+
+.project-tab.active {
+  color: #2980b9;
+  border-bottom: 3px solid #2980b9;
+  font-weight: bold;
+}
+
+.project-tab:hover:not(.active) {
+  background-color: #e8f0f6;
+  color: #444;
+}
+
+.project-tab-icon {
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.project-tab-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.project-results {
+  display: none;
+}
+
+.project-results.active {
+  display: block;
+}
+
+/* Project headers for recent searches */
 .project-header {
   display: flex;
   align-items: center;
