@@ -691,9 +691,16 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Add pagination if needed
     if (data.next) {
+      // Calculate remaining pages
+      // Each page has at most 50 results
+      const currentResultsCount = Object.values(resultsByProject).flat().length;
+      const totalResultsCount = data.count;
+      const remainingResults = totalResultsCount - currentResultsCount;
+      const remainingPages = Math.ceil(remainingResults / 50);
+      
       const loadMoreBtn = document.createElement('button');
       loadMoreBtn.className = 'pyhc-load-more';
-      loadMoreBtn.textContent = 'Load more results';
+      loadMoreBtn.textContent = `Load more results (${remainingPages} ${remainingPages === 1 ? 'page' : 'pages'} remaining)`;
       loadMoreBtn.addEventListener('click', function() {
         loadNextPage(data.next);
       });
@@ -853,8 +860,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Find the load more button
     const loadMoreBtn = resultsContainer.querySelector('.pyhc-load-more');
     if (loadMoreBtn) {
+      // Get the remaining pages from the current button text
+      const remainingMatch = loadMoreBtn.textContent.match(/\((\d+)/);
+      const remainingText = remainingMatch ? ` (${remainingMatch[1]} ${parseInt(remainingMatch[1]) === 1 ? 'page' : 'pages'} remaining)` : '';
+      
       // Show loading state
-      loadMoreBtn.textContent = 'Loading more results...';
+      loadMoreBtn.textContent = `Loading more results...${remainingText}`;
       loadMoreBtn.disabled = true;
     }
     
@@ -952,9 +963,16 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Add pagination if needed
         if (data.next) {
+          // Calculate remaining pages
+          // Each page has at most 50 results
+          const currentResultsCount = Array.from(document.querySelectorAll('.project-results .hit-block')).length;
+          const totalResultsCount = data.count;
+          const remainingResults = totalResultsCount - currentResultsCount;
+          const remainingPages = Math.ceil(remainingResults / 50);
+          
           const newLoadMoreBtn = document.createElement('button');
           newLoadMoreBtn.className = 'pyhc-load-more';
-          newLoadMoreBtn.textContent = 'Load more results';
+          newLoadMoreBtn.textContent = `Load more results (${remainingPages} ${remainingPages === 1 ? 'page' : 'pages'} remaining)`;
           newLoadMoreBtn.addEventListener('click', function() {
             loadNextPage(data.next);
           });
