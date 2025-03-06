@@ -16,7 +16,6 @@ The PyHC Documentation Hub allows searching across documentation for all PyHC pa
 
 The PyHC Documentation Hub leverages the Read The Docs Server-Side Search API to query multiple project documentations simultaneously. The search is performed client-side using JavaScript, which constructs queries to the Read The Docs API and presents the results in a unified interface.
 
-
 ## Development
 
 ### Requirements
