@@ -995,7 +995,8 @@ document.addEventListener('DOMContentLoaded', function() {
   // Update the help text in the footer based on context
   function updateHelpText() {
     const tabHelpItem = document.getElementById('tab-help-item');
-    if (!tabHelpItem) return;
+    const helpContainer = document.getElementById('pyhc-search-help');
+    if (!tabHelpItem || !helpContainer) return;
     
     // Show tab navigation help only when:
     // 1. We're viewing search results (not recent searches)
@@ -1005,8 +1006,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (isTabView && !searchInputHasFocus) {
       tabHelpItem.style.display = 'list-item';
+      helpContainer.classList.add('condensed'); // Add condensed class for smaller gaps
     } else {
       tabHelpItem.style.display = 'none';
+      helpContainer.classList.remove('condensed'); // Remove condensed class
     }
   }
   

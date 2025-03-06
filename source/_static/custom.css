@@ -147,6 +147,16 @@
   gap: 20px;
 }
 
+/* Reduce gap when the tabs navigation help item is visible */
+.pyhc-search-dialog .help #tab-help-item[style="display: list-item;"] ~ * {
+  margin-left: 0;
+}
+
+/* Use a special class for condensed mode with smaller gaps */
+.pyhc-search-dialog .help.condensed {
+  gap: 10px;
+}
+
 .pyhc-search-dialog .help li {
   margin: 0;
 }
@@ -164,6 +174,8 @@
   display: flex;
   align-items: center;
   gap: 5px;
+  margin-left: auto; /* Push to right */
+  text-align: right;
 }
 
 .pyhc-search-dialog .credits img {
