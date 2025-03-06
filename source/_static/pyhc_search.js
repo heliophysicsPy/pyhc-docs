@@ -707,8 +707,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 result.blocks[0].highlights.content.length > 0 ? 
                 result.blocks[0].highlights.content[0] : null
       };
-      
-      console.log('Search result clicked, saving to recent searches:', searchResult);
+    
       
       // Don't wait for event propagation, save right away
       recentSearches.add(searchResult);
@@ -765,7 +764,6 @@ document.addEventListener('DOMContentLoaded', function() {
               project: result.project.slug,
               preview: block.highlights.content[0]
             };
-            console.log('Hit content clicked, saving to recent searches:', searchResult);
             
             // Don't wait for event propagation, save right away
             recentSearches.add(searchResult);
