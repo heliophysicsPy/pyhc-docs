@@ -2,6 +2,9 @@
 
 A unified Read The Docs documentation search hub for Python in Heliophysics Community (PyHC) packages.
 
+Deployed at:
+[pyhc.org/pyhc-docs](https://heliopython.org/pyhc-docs/)
+
 ## About
 
 The PyHC Documentation Hub allows searching across documentation for all PyHC packages that use Read The Docs from a single interface. Instead of having to search each package's documentation individually, users can perform a unified search and see results from all packages.
@@ -44,16 +47,6 @@ The implementation can be found in `source/_static/pyhc_search.js`.
 2. Install the dependencies: `pip install -r source/requirements.txt`
 3. Build the documentation: `make html`
 4. Open `build/html/index.html` in your browser
-
-For development, you can use Python's built-in HTTP server:
-
-```bash
-# Build and serve the documentation
-make html
-python -m http.server -d build/html
-```
-
-Then access the documentation at http://localhost:8000
 
 ## License
 
