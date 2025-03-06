@@ -1,5 +1,26 @@
 // PyHC Documentation Hub - Unified Search
 document.addEventListener('DOMContentLoaded', function() {
+  // Add scroll event handler to toggle shadow on tabs when scrolling
+  function initScrollShadow() {
+    // Get the results container
+    const resultsContainer = document.getElementById('pyhc-search-content');
+    if (!resultsContainer) return;
+    
+    // Add scroll event listener to the results container
+    resultsContainer.addEventListener('scroll', function() {
+      // Find project tabs
+      const tabsContainer = resultsContainer.querySelector('.project-tabs');
+      if (!tabsContainer) return;
+      
+      // Add or remove 'scrolled' class based on scroll position
+      if (resultsContainer.scrollTop > 0) {
+        tabsContainer.classList.add('scrolled');
+      } else {
+        tabsContainer.classList.remove('scrolled');
+      }
+    });
+  }
+  
   // Create the search modal
   createSearchModal();
   
@@ -614,6 +635,9 @@ document.addEventListener('DOMContentLoaded', function() {
     tabsContainer.className = 'project-tabs';
     resultsContainer.appendChild(tabsContainer);
     
+    // Initialize the scroll shadow for tabs
+    initScrollShadow();
+    
     // Create results containers (one for each project)
     const resultsContainers = {};
     
@@ -675,6 +699,9 @@ document.addEventListener('DOMContentLoaded', function() {
       });
       resultsContainer.appendChild(loadMoreBtn);
     }
+    
+    // Initialize scroll shadow functionality
+    initScrollShadow();
   }
   
   // Create a single result item using Read the Docs style
