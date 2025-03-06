@@ -411,8 +411,8 @@
 .project-header h3 {
   margin: 0;
   font-size: 16px;
-  font-weight: bold;
-  color: #2980b9;
+  font-weight: normal;
+  color: #333;
 }
 
 .project-icon {
