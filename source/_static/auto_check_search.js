@@ -9,7 +9,6 @@ document.addEventListener("DOMContentLoaded", function() {
             if (subprojectCheckbox) {
                 if (!subprojectCheckbox.checked) {
                     subprojectCheckbox.checked = true;
-                    console.log("'Include subprojects' checkbox checked by auto_check_search.js.");
                 }
             } else {
                 setTimeout(checkSubprojectCheckbox, 500); // Retry after 500ms

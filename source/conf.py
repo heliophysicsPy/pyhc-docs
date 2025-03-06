@@ -6,7 +6,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'PyHC Documentation Hub'
-copyright = '2024, PyHC'
+copyright = '2025, PyHC'
 author = 'PyHC'
 
 # -- General configuration ---------------------------------------------------
@@ -14,19 +14,13 @@ author = 'PyHC'
 
 # Extensions for Sphinx
 extensions = [
-    'sphinx.ext.intersphinx',  # Enables linking to other projects
     'sphinx_rtd_theme',
+    'sphinx_copybutton',
 ]
 
 # Template and static paths
 templates_path = ['_templates']
 exclude_patterns = []
-
-# Intersphinx mappings for linking to PyHC subprojects
-intersphinx_mapping = {
-    'pysat-copy': ('https://pysat-copy.readthedocs.io/en/latest/', None),
-    'pyspedas-copy': ('https://pyspedas-copy.readthedocs.io/en/latest/', None),
-}
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
@@ -35,8 +29,68 @@ intersphinx_mapping = {
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 html_extra_path = ['_static/robots.txt']
-html_js_files = ['auto_check_search.js']
+html_js_files = ['pyhc_search.js']
+html_css_files = ['custom.css']
 
+html_theme_options = {
+    'logo_only': False,
+    'display_version': True,
+    'collapse_navigation': False,
+    'sticky_navigation': True,
+    'navigation_depth': 4,
+    'includehidden': True,
+    'titles_only': False,
+}
+
+# Define the PyHC projects to search
+pyhc_projects = [
+    'sunpy',
+    'plasmapy',
+    'pysat',
+    'pyspedas',
+    'aacgmv2',
+    'afino',
+    'aiapy',
+    'aidapy',
+    'amisrsynthdata',
+    'apexpy',
+    'cdflib',
+    'ccsdspy',
+    'enlilviz',
+    'fiasco',
+    'gcmprocpy',
+    'geospacelab',
+    'hermes-core',
+    'irispy-lmsal',
+    'lofarsun',
+    'mcalf',
+    'ndcube',
+    'ocbpy',
+    'ommbv',
+    'pycdfpp',
+    'pydarn',
+    'pyflct',
+    'pyrfu',
+    'pytplot',
+    'regularizepsf',
+    'sami2py',
+    'sammi',
+    'savic',
+    'solarmach',
+    'space-packet-parser',
+    'speasy',
+    'spiceypy',
+    'sunkit-image',
+    'sunkit-instruments',
+    'sunraster',
+    'viresclient',
+    'xrtpy',
+]
+
+# Make the project list available to the JavaScript
+html_context = {
+    'pyhc_projects': pyhc_projects
+}
 
 # Additional configuration (optional)
 # Add any additional options you may need here as the project expands.
