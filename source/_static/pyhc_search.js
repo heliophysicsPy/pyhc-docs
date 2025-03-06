@@ -284,16 +284,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize help text (will hide tab navigation help when input has focus)
     updateHelpText();
     
-    console.log('Opening search modal');
-    
     // If the RTD search input has a value, copy it
     if (rtdSearchInput && rtdSearchInput.value) {
       searchInput.value = rtdSearchInput.value;
-      console.log('RTD search input has value:', rtdSearchInput.value);
       performSearch();
     } else {
       // If no search term, show recent searches
-      console.log('No search term, showing recent searches');
       displayRecentSearches();
     }
   }
@@ -308,14 +304,12 @@ document.addEventListener('DOMContentLoaded', function() {
   function getProjects() {
     const projectsScript = document.getElementById('pyhc-projects-data');
     if (!projectsScript) {
-      console.error('Project data not found! Make sure pyhc_projects is defined in conf.py');
       return [];
     }
     
     try {
       return JSON.parse(projectsScript.textContent);
     } catch (e) {
-      console.error('Failed to parse project data:', e);
       return [];
     }
   }
@@ -324,7 +318,6 @@ document.addEventListener('DOMContentLoaded', function() {
   function getProjectsQuery() {
     const projects = getProjects();
     if (projects.length === 0) {
-      console.error('No projects defined for search');
       return '';
     }
     
@@ -338,8 +331,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Add a search result to recent searches
     add: function(result) {
-      console.log('Adding to recent searches:', result);
-      
       // Check if this result is already in recent searches
       const exists = this.searches.findIndex(item => 
         item.url === result.url && item.title === result.title
@@ -347,13 +338,11 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // If it exists, remove it so we can add it to the top
       if (exists !== -1) {
-        console.log('Found existing entry at index', exists, 'removing it');
         this.searches.splice(exists, 1);
       }
       
       // Add to the beginning of the array
       this.searches.unshift(result);
-      console.log('Added to recent searches, new count:', this.searches.length);
       
       // Only keep the most recent 10 searches
       if (this.searches.length > 10) {
@@ -366,11 +355,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Remove a search result from recent searches
     remove: function(index) {
-      console.log('Removing recent search at index:', index);
       if (index >= 0 && index < this.searches.length) {
         this.searches.splice(index, 1);
         this.save();
-        console.log('Removed, new count:', this.searches.length);
       }
     },
     
@@ -378,8 +365,8 @@ document.addEventListener('DOMContentLoaded', function() {
     save: function() {
       try {
         localStorage.setItem('pyhc-recent-searches', JSON.stringify(this.searches));
-        console.log('Saved recent searches to localStorage');
       } catch (e) {
+        // Log error if localStorage is not available
         console.error('Failed to save recent searches to localStorage:', e);
       }
     },
@@ -390,17 +377,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const saved = localStorage.getItem('pyhc-recent-searches');
         if (saved) {
           this.searches = JSON.parse(saved);
-          console.log('Loaded', this.searches.length, 'recent searches from localStorage');
-          
-          // Debug: log loaded searches
-          this.searches.forEach((item, i) => {
-            console.log(`[${i}] ${item.title} - ${item.url}`);
-          });
-        } else {
-          console.log('No saved recent searches found');
         }
       } catch (e) {
-        console.error('Failed to load recent searches from localStorage:', e);
         this.searches = [];
       }
     }
@@ -450,9 +428,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Build the URL with the correctly encoded query parameter
     const queryUrl = `${apiBaseUrl}?q=${encodeURIComponent(fullQuery)}`;
     
-    console.log('Search URL:', queryUrl);
-    console.log('Decoded URL:', apiBaseUrl + '?q=' + fullQuery);
-    
     // Fetch results
     fetch(queryUrl)
       .then(response => {
@@ -462,13 +437,11 @@ document.addEventListener('DOMContentLoaded', function() {
         return response.json();
       })
       .then(data => {
-        console.log('Search response:', data);
         // Reset search icon to magnifying glass
         resetSearchIcon();
         displayResults(data, query);
       })
       .catch(error => {
-        console.error('Search error:', error);
         // Reset search icon to magnifying glass
         resetSearchIcon();
         showMessage(`An error occurred while searching: ${error.message}. Please try again later.`);
@@ -477,14 +450,11 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Display recent searches
   function displayRecentSearches() {
-    console.log('Displaying recent searches, count:', recentSearches.searches.length);
-    
     // Update help text (hide tab navigation help for recent searches)
     updateHelpText();
     
     // Add a test entry if none exist and we're in development
     if (window.location.hostname === 'localhost' && (!recentSearches.searches || recentSearches.searches.length === 0)) {
-      console.log('Adding test recent search entry for development');
       recentSearches.add({
         title: 'Test Recent Search',
         url: 'https://example.com/test',
@@ -495,7 +465,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // If no recent searches, leave the results container empty
     if (!recentSearches.searches || recentSearches.searches.length === 0) {
-      console.log('No recent searches to display');
       resultsContainer.innerHTML = '';
       return;
     }
@@ -513,7 +482,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Add each recent search
     recentSearches.searches.forEach((search, index) => {
-      console.log('Rendering recent search item:', search);
       const recentItem = document.createElement('div');
       recentItem.className = 'hit-block';
       
@@ -522,7 +490,6 @@ document.addEventListener('DOMContentLoaded', function() {
       link.className = 'hit-block-heading';
       link.href = search.url;
       link.addEventListener('click', function(event) {
-        console.log('Recent search item clicked');
         hideSearchModal(); // Close the modal when a result is clicked
       });
       
@@ -572,7 +539,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Add same click event as the title
         previewLink.addEventListener('click', function(event) {
-          console.log('Recent search preview clicked');
           // For middle click (new tab) do nothing, for left click close the modal
           if (event.button === 0 && !event.ctrlKey && !event.metaKey) {
             hideSearchModal(); // Close the modal when a result is clicked
