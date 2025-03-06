@@ -1,6 +1,6 @@
 # PyHC Documentation Hub
 
-A unified documentation search hub for Python in Heliophysics Community (PyHC) packages.
+A unified documentation search hub for Python in Heliophysics Community (PyHC) packages that use Read The Docs.
 
 ## About
 
