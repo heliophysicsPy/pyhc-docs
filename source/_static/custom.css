@@ -16,7 +16,7 @@
 .pyhc-search-dialog {
   position: relative;
   width: 90%;
-  /* max-width: 800px; */  /* Leave commented for future reference */
+  max-width: 800px;  /* Note: comment this out if we decide to allow it to fill more of the page  */
   margin: 80px auto;
   background-color: white;
   border-radius: 5px;
