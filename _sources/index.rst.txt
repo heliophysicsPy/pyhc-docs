@@ -23,6 +23,7 @@ Below are the currently available packages in this hub. Click on a package name 
 - `aidapy <https://aidapy.readthedocs.io>`_ - A Python package to provide machine learning and statistical methods to heliophysics data.
 - `amisrsynthdata <https://amisrsynthdata.readthedocs.io/en/latest/>`_ - The amisrsynthdata package generates synthetic data for the Advanced Modular Incoherent Scatter Radars (AMISR).
 - `apexpy <http://apexpy.readthedocs.io>`_ - A Python wrapper for the Apex fortran library.
+- `asilib <https://aurora-asi-lib.readthedocs.io/>`_ - asilib is an open source package providing data access and analysis tools for the world’s all-sky imager (ASI) data.
 - `CDFlib <https://cdflib.readthedocs.io/en/latest>`_ - Read / write NASA CDF with pure Python + Numpy, no compiling.
 - `CCSDSPy <https://docs.ccsdspy.org/en/latest/#>`_ - A Python package for reading CCSDS (spacecraft) packet data.
 - `enlilviz <https://enlilviz.readthedocs.io/>`_ - A Python toolkit for Enlil solar wind visualizations.
