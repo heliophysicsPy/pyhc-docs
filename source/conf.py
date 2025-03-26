@@ -54,6 +54,7 @@ pyhc_projects = [
     'aidapy',
     'amisrsynthdata',
     'apexpy',
+    'asilib',
     'cdflib',
     'ccsdspy',
     'enlilviz',
