@@ -75,7 +75,7 @@ pyhc_projects = [
     'pytplot',
     'regularizepsf',
     'sami2py',
-    'sammi',
+    'sammi-cdf',
     'savic',
     'solarmach',
     'space-packet-parser',
