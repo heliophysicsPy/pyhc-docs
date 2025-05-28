@@ -44,7 +44,7 @@ Below are the currently available packages in this hub. Click on a package name 
 - `PyTplot <https://pytplot.readthedocs.io/en/latest/>`_ - Based on IDL tplot, plots and manipulates time series data.
 - `regularizePSF <https://regularizepsf.readthedocs.io/en/latest/>`_ - A Python package for manipulating and correcting various point spread functions.
 - `sami2py <https://sami2py.readthedocs.io>`_ - Run, read, and plot the SAMI2 ionospheric model.
-- `SAMMI <https://swxschema.readthedocs.io/en/latest/>`_ - Manage attributes for ISTP CDF files using YAML.
+- `SAMMI <https://sammi-cdf.readthedocs.io/en/latest/>`_ - Share Attribute and Metadata Management Interface - manage attributes for ISTP CDF files using YAML.
 - `SAVIC <https://savic.readthedocs.io/en/latest/index.html>`_ - Stability Analysis Vitalizing Instability Classification - a Python package for predicting, quantifying and classifying ion-driven plasma instabilities.
 - `solarmach <https://solarmach.readthedocs.io>`_ - Multi-spacecraft heliospheric configuration plotter.
 - `space-packet-parser <https://space-packet-parser.readthedocs.io>`_ - A CCSDS telemetry packet decoding library based on the XTCE packet format description standard.
