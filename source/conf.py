@@ -84,6 +84,7 @@ pyhc_projects = [
     'sunkit-image',
     'sunkit-instruments',
     'sunraster',
+    'swxsoc',
     'viresclient',
     'xrtpy',
 ]
