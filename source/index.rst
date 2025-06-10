@@ -53,6 +53,7 @@ Below are the currently available packages in this hub. Click on a package name 
 - `sunkit-image <https://docs.sunpy.org/projects/sunkit-image>`_ - A image processing toolbox for Solar Physics.
 - `sunkit-instruments <https://docs.sunpy.org/projects/sunkit-instruments>`_ - A SunPy-affiliated package for solar instrument-specific tools.
 - `sunraster <https://docs.sunpy.org/projects/sunraster>`_ - A SunPy-affiliated package which provides tools to analyze data from spectral data from any solar mission.
+- `swxsoc <https://swxsoc.readthedocs.io>`_ - Pipeline and analysis tools for space weather data processing.
 - `viresclient <https://viresclient.readthedocs.io>`_ - Access to ESA Swarm mission products.
 - `XRTpy <https://xrtpy.readthedocs.io>`_ - A Python package for analyzing data from the X-Ray Telescope instrument onboard the Hinode spacecraft.
 
