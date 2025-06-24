@@ -63,6 +63,7 @@ pyhc_projects = [
     'geospacelab',
     'hermes-core',
     'irispy-lmsal',
+    'kaipy-docs',
     'lofarsun',
     'mcalf',
     'ndcube',
