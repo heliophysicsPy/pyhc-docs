@@ -32,6 +32,7 @@ Below are the currently available packages in this hub. Click on a package name 
 - `GeospaceLAB <https://geospacelab.readthedocs.io/en/latest/>`_ - A Python library for managing and visualizing data in Space Physics.
 - `HERMES-Core <https://hermes-core.readthedocs.io/en/latest/>`_ - A central Python Package for common functionality across all HERMES instruments.
 - `irispy-lmsal <https://irispy-lmsal.readthedocs.io>`_ - A Python package that provides the tools to read in and analyze data from the IRIS solar-observing satellite.
+- `Kaipy <https://kaipy-docs.readthedocs.io>`_ - Kaipy is a Python package for analysis and visualization of simulation results from a scientific software package Kaiju.
 - `lofarSun <https://lofar-sun-tools.readthedocs.io/en/latest>`_ - LOFAR solar and spaceweather data processing.
 - `MCALF <https://mcalf.macbride.me>`_ - Accurately constraining velocity information from spectral imaging observations using machine learning techniques.
 - `NDCube <https://docs.sunpy.org/projects/ndcube/en/stable/>`_ - A Python package for manipulating, inspecting and visualizing multi-dimensional contiguous and non-contiguous coordinate-aware data arrays.
