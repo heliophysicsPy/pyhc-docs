@@ -58,6 +58,7 @@ pyhc_projects = [
     'cdflib',
     'ccsdspy',
     'enlilviz',
+    'euvpy',
     'fiasco',
     'gcmprocpy',
     'geospacelab',

@@ -27,6 +27,7 @@ Below are the currently available packages in this hub. Click on a package name 
 - `CDFlib <https://cdflib.readthedocs.io/en/latest>`_ - Read / write NASA CDF with pure Python + Numpy, no compiling.
 - `CCSDSPy <https://docs.ccsdspy.org/en/latest/#>`_ - A Python package for reading CCSDS (spacecraft) packet data.
 - `enlilviz <https://enlilviz.readthedocs.io/>`_ - A Python toolkit for Enlil solar wind visualizations.
+- `EUVpy <https://euvpy.readthedocs.io>`_ - A Python package containing several models for solar EUV irradiance.
 - `fiasco <http://fiasco.readthedocs.io>`_ - A Python interface to the CHIANTI atomic database.
 - `GCMprocpy <https://gcmprocpy.readthedocs.io>`_ - A Python package for post processing and analysis of TIE-GCM and WACCM-X outputs.
 - `GeospaceLAB <https://geospacelab.readthedocs.io/en/latest/>`_ - A Python library for managing and visualizing data in Space Physics.
