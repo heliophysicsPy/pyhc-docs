@@ -61,7 +61,8 @@ document.addEventListener('DOMContentLoaded', function() {
   // Start with the first proxy, but remember the last successful one.
   let currentProxyIndex = 0;
 
-  async function fetchSearchResults(targetUrl) {
+  async function fetchSearchResults(targetUrl, options = {}) {
+    const { onProxyFallback = null } = options;
     let lastError = null;
 
     for (let attempt = 0; attempt < corsProxies.length; attempt++) {
@@ -69,7 +70,11 @@ document.addEventListener('DOMContentLoaded', function() {
       const proxy = corsProxies[proxyIndex];
 
       if (attempt > 0) {
-        showMessage('Trying alternative proxy service... Please wait.');
+        if (typeof onProxyFallback === 'function') {
+          onProxyFallback(proxy, attempt);
+        } else {
+          showMessage('Trying alternative proxy service... Please wait.');
+        }
       }
 
       try {
@@ -907,6 +912,98 @@ document.addEventListener('DOMContentLoaded', function() {
     
     return hitBlock;
   }
+
+  function appendNextPageResults(data) {
+    // Group new results by project
+    const resultsByProject = {};
+
+    data.results.forEach(result => {
+      const projectSlug = result.project.slug;
+      if (!resultsByProject[projectSlug]) {
+        resultsByProject[projectSlug] = [];
+      }
+      resultsByProject[projectSlug].push(result);
+    });
+
+    // Get existing project tabs container
+    const tabsContainer = resultsContainer.querySelector('.project-tabs');
+    if (!tabsContainer) {
+      return;
+    }
+
+    // Process each project's results
+    for (const [project, results] of Object.entries(resultsByProject)) {
+      // Check if there's already a container for this project
+      let projectContainer = resultsContainer.querySelector(`.project-results[data-project="${project}"]`);
+
+      // If there's no tab for this project yet, create it
+      if (!projectContainer) {
+        // Create a new tab for this project
+        const tab = document.createElement('div');
+        tab.className = 'project-tab';
+        tab.dataset.project = project;
+        tab.innerHTML = `
+          <div class="project-tab-icon">
+            <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="book" class="svg-inline--fa fa-book" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+              <path fill="currentColor" d="M96 0C43 0 0 43 0 96V416c0 53 43 96 96 96H384h32c17.7 0 32-14.3 32-32s-14.3-32-32-32V384c17.7 0 32-14.3 32-32V32c0-17.7-14.3-32-32-32H384 96zm0 384H352v64H96c-17.7 0-32-14.3-32-32s14.3-32 32-32zm32-240c0-8.8 7.2-16 16-16H336c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16zm16 48H336c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16s7.2-16 16-16z"></path>
+            </svg>
+          </div>
+          ${project} (${results.length})
+        `;
+
+        // Add tab click handler
+        tab.addEventListener('click', function() {
+          // Remove active class from all tabs and containers
+          document.querySelectorAll('.project-tab').forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.project-results').forEach(c => c.classList.remove('active'));
+
+          // Add active class to this tab and its container
+          tab.classList.add('active');
+          const container = resultsContainer.querySelector(`.project-results[data-project="${project}"]`);
+          if (container) container.classList.add('active');
+        });
+
+        tabsContainer.appendChild(tab);
+
+        // Create a new container for this project
+        projectContainer = document.createElement('div');
+        projectContainer.className = 'project-results';
+        projectContainer.dataset.project = project;
+        resultsContainer.appendChild(projectContainer);
+      } else {
+        // If this project already exists, update the count in the tab
+        const projectTab = tabsContainer.querySelector(`.project-tab[data-project="${project}"]`);
+        if (projectTab) {
+          const countMatch = projectTab.innerText.match(/\((\d+)\)/);
+          const currentCount = countMatch ? parseInt(countMatch[1], 10) : 0;
+          const newCount = currentCount + results.length;
+          projectTab.innerHTML = projectTab.innerHTML.replace(/\(\d+\)/, `(${newCount})`);
+        }
+      }
+
+      // Add each result for this project to its container
+      results.forEach(result => {
+        const resultItem = createResultItem(result);
+        projectContainer.appendChild(resultItem);
+      });
+    }
+
+    // Add pagination if needed
+    if (data.next) {
+      const currentResultsCount = Array.from(resultsContainer.querySelectorAll('.project-results .hit-block')).length;
+      const totalResultsCount = data.count;
+      const remainingResults = totalResultsCount - currentResultsCount;
+      const remainingPages = Math.ceil(remainingResults / 50);
+
+      const newLoadMoreBtn = document.createElement('button');
+      newLoadMoreBtn.className = 'pyhc-load-more';
+      newLoadMoreBtn.textContent = `Load more results (${remainingPages} ${remainingPages === 1 ? 'page' : 'pages'} remaining)`;
+      newLoadMoreBtn.addEventListener('click', function() {
+        loadNextPage(data.next);
+      });
+      resultsContainer.appendChild(newLoadMoreBtn);
+    }
+  }
   
   // Load the next page of results
   function loadNextPage(nextUrl) {
@@ -921,258 +1018,27 @@ document.addEventListener('DOMContentLoaded', function() {
       loadMoreBtn.textContent = `Loading more results...${remainingText}`;
       loadMoreBtn.disabled = true;
     }
-    
-    // We need to handle the next URL through the CORS proxy
-    const proxiedNextUrl = corsProxyUrl + encodeURIComponent(nextUrl);
-    
-    fetch(proxiedNextUrl)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
+
+    fetchSearchResults(nextUrl, {
+      onProxyFallback: () => {
+        if (loadMoreBtn) {
+          loadMoreBtn.textContent = 'Trying alternative proxy service... Please wait.';
+          loadMoreBtn.disabled = true;
         }
-        return response.json();
-      })
+      }
+    })
       .then(data => {
         // Remove the load more button
         if (loadMoreBtn) {
           loadMoreBtn.remove();
         }
-        
-        // Group new results by project
-        const resultsByProject = {};
-        
-        data.results.forEach(result => {
-          const projectSlug = result.project.slug;
-          if (!resultsByProject[projectSlug]) {
-            resultsByProject[projectSlug] = [];
-          }
-          resultsByProject[projectSlug].push(result);
-        });
-        
-        // Get existing project tabs container
-        const tabsContainer = resultsContainer.querySelector('.project-tabs');
-        
-        // Process each project's results
-        for (const [project, results] of Object.entries(resultsByProject)) {
-          // Check if there's already a container for this project
-          let projectContainer = resultsContainer.querySelector(`.project-results[data-project="${project}"]`);
-          
-          // If there's no tab for this project yet, create it
-          if (!projectContainer) {
-            // Create a new tab for this project
-            const tab = document.createElement('div');
-            tab.className = 'project-tab';
-            tab.dataset.project = project;
-            tab.innerHTML = `
-              <div class="project-tab-icon">
-                <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="book" class="svg-inline--fa fa-book" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-                  <path fill="currentColor" d="M96 0C43 0 0 43 0 96V416c0 53 43 96 96 96H384h32c17.7 0 32-14.3 32-32s-14.3-32-32-32V384c17.7 0 32-14.3 32-32V32c0-17.7-14.3-32-32-32H384 96zm0 384H352v64H96c-17.7 0-32-14.3-32-32s14.3-32 32-32zm32-240c0-8.8 7.2-16 16-16H336c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16zm16 48H336c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16s7.2-16 16-16z"></path>
-                </svg>
-              </div>
-              ${project} (${results.length})
-            `;
-            
-            // Add tab click handler
-            tab.addEventListener('click', function() {
-              // Remove active class from all tabs and containers
-              document.querySelectorAll('.project-tab').forEach(t => t.classList.remove('active'));
-              document.querySelectorAll('.project-results').forEach(c => c.classList.remove('active'));
-              
-              // Add active class to this tab and its container
-              tab.classList.add('active');
-              const container = resultsContainer.querySelector(`.project-results[data-project="${project}"]`);
-              if (container) container.classList.add('active');
-            });
-            
-            tabsContainer.appendChild(tab);
-            
-            // Create a new container for this project
-            projectContainer = document.createElement('div');
-            projectContainer.className = 'project-results';
-            projectContainer.dataset.project = project;
-            
-            // Find the load more button to insert before it (if it exists)
-            const loadMoreBtn = resultsContainer.querySelector('.pyhc-load-more');
-            if (loadMoreBtn) {
-              resultsContainer.insertBefore(projectContainer, loadMoreBtn);
-            } else {
-              resultsContainer.appendChild(projectContainer);
-            }
-          } else {
-            // If this project already exists, update the count in the tab
-            const projectTab = tabsContainer.querySelector(`.project-tab[data-project="${project}"]`);
-            if (projectTab) {
-              // Get current count from tab
-              const currentCount = parseInt(projectTab.innerText.match(/\((\d+)\)/)[1]);
-              // Update tab text with new count
-              const newCount = currentCount + results.length;
-              projectTab.innerHTML = projectTab.innerHTML.replace(/\(\d+\)/, `(${newCount})`);
-            }
-          }
-          
-          // Add each result for this project to its container
-          results.forEach(result => {
-            const resultItem = createResultItem(result);
-            projectContainer.appendChild(resultItem);
-          });
-        }
-        
-        // Add pagination if needed
-        if (data.next) {
-          // Calculate remaining pages
-          // Each page has at most 50 results
-          const currentResultsCount = Array.from(document.querySelectorAll('.project-results .hit-block')).length;
-          const totalResultsCount = data.count;
-          const remainingResults = totalResultsCount - currentResultsCount;
-          const remainingPages = Math.ceil(remainingResults / 50);
-          
-          const newLoadMoreBtn = document.createElement('button');
-          newLoadMoreBtn.className = 'pyhc-load-more';
-          newLoadMoreBtn.textContent = `Load more results (${remainingPages} ${remainingPages === 1 ? 'page' : 'pages'} remaining)`;
-          newLoadMoreBtn.addEventListener('click', function() {
-            loadNextPage(data.next);
-          });
-          resultsContainer.appendChild(newLoadMoreBtn);
-        }
+        appendNextPageResults(data);
       })
       .catch(error => {
         console.error('Error loading more results:', error);
-        
-        // Try with the next proxy if available
-        if (corsProxies.length > 1) {
-          switchToNextProxy();
-          const retryProxiedUrl = corsProxyUrl + encodeURIComponent(nextUrl);
-          
-          if (loadMoreBtn) {
-            loadMoreBtn.textContent = 'Trying alternative proxy service...';
-          }
-          
-          // Retry with new proxy
-          setTimeout(() => {
-            fetch(retryProxiedUrl)
-              .then(response => {
-                if (!response.ok) {
-                  throw new Error('Network response was not ok');
-                }
-                return response.json();
-              })
-              .then(data => {
-                // Remove the load more button
-                if (loadMoreBtn) {
-                  loadMoreBtn.remove();
-                }
-                
-                // Continue with processing the data as before
-                // Group new results by project
-                const resultsByProject = {};
-                
-                data.results.forEach(result => {
-                  const projectSlug = result.project.slug;
-                  if (!resultsByProject[projectSlug]) {
-                    resultsByProject[projectSlug] = [];
-                  }
-                  resultsByProject[projectSlug].push(result);
-                });
-                
-                // Get existing project tabs container
-                const tabsContainer = resultsContainer.querySelector('.project-tabs');
-                
-                // Process each project's results
-                for (const [project, results] of Object.entries(resultsByProject)) {
-                  // Check if there's already a container for this project
-                  let projectContainer = resultsContainer.querySelector(`.project-results[data-project="${project}"]`);
-                  
-                  // If there's no tab for this project yet, create it
-                  if (!projectContainer) {
-                    // Create a new tab for this project
-                    const tab = document.createElement('div');
-                    tab.className = 'project-tab';
-                    tab.dataset.project = project;
-                    tab.innerHTML = `
-                      <div class="project-tab-icon">
-                        <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="book" class="svg-inline--fa fa-book" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-                          <path fill="currentColor" d="M96 0C43 0 0 43 0 96V416c0 53 43 96 96 96H384h32c17.7 0 32-14.3 32-32s-14.3-32-32-32V384c17.7 0 32-14.3 32-32V32c0-17.7-14.3-32-32-32H384 96zm0 384H352v64H96c-17.7 0-32-14.3-32-32s14.3-32 32-32zm32-240c0-8.8 7.2-16 16-16H336c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16zm16 48H336c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16s7.2-16 16-16z"></path>
-                        </svg>
-                      </div>
-                      ${project} (${results.length})
-                    `;
-                    
-                    // Add tab click handler
-                    tab.addEventListener('click', function() {
-                      // Remove active class from all tabs and containers
-                      document.querySelectorAll('.project-tab').forEach(t => t.classList.remove('active'));
-                      document.querySelectorAll('.project-results').forEach(c => c.classList.remove('active'));
-                      
-                      // Add active class to this tab and its container
-                      tab.classList.add('active');
-                      const container = resultsContainer.querySelector(`.project-results[data-project="${project}"]`);
-                      if (container) container.classList.add('active');
-                    });
-                    
-                    tabsContainer.appendChild(tab);
-                    
-                    // Create a new container for this project
-                    projectContainer = document.createElement('div');
-                    projectContainer.className = 'project-results';
-                    projectContainer.dataset.project = project;
-                    
-                    // Find the load more button to insert before it (if it exists)
-                    const loadMoreBtn = resultsContainer.querySelector('.pyhc-load-more');
-                    if (loadMoreBtn) {
-                      resultsContainer.insertBefore(projectContainer, loadMoreBtn);
-                    } else {
-                      resultsContainer.appendChild(projectContainer);
-                    }
-                  } else {
-                    // If this project already exists, update the count in the tab
-                    const projectTab = tabsContainer.querySelector(`.project-tab[data-project="${project}"]`);
-                    if (projectTab) {
-                      // Get current count from tab
-                      const currentCount = parseInt(projectTab.innerText.match(/\((\d+)\)/)[1]);
-                      // Update tab text with new count
-                      const newCount = currentCount + results.length;
-                      projectTab.innerHTML = projectTab.innerHTML.replace(/\(\d+\)/, `(${newCount})`);
-                    }
-                  }
-                  
-                  // Add each result for this project to its container
-                  results.forEach(result => {
-                    const resultItem = createResultItem(result);
-                    projectContainer.appendChild(resultItem);
-                  });
-                }
-                
-                // Add pagination if needed
-                if (data.next) {
-                  // Calculate remaining pages
-                  const currentResultsCount = Array.from(document.querySelectorAll('.project-results .hit-block')).length;
-                  const totalResultsCount = data.count;
-                  const remainingResults = totalResultsCount - currentResultsCount;
-                  const remainingPages = Math.ceil(remainingResults / 50);
-                  
-                  const newLoadMoreBtn = document.createElement('button');
-                  newLoadMoreBtn.className = 'pyhc-load-more';
-                  newLoadMoreBtn.textContent = `Load more results (${remainingPages} ${remainingPages === 1 ? 'page' : 'pages'} remaining)`;
-                  newLoadMoreBtn.addEventListener('click', function() {
-                    loadNextPage(data.next);
-                  });
-                  resultsContainer.appendChild(newLoadMoreBtn);
-                }
-              })
-              .catch(retryError => {
-                // If retry fails, show error
-                if (loadMoreBtn) {
-                  loadMoreBtn.textContent = 'Error loading more results. Click to try again.';
-                  loadMoreBtn.disabled = false;
-                }
-              });
-          }, 1000);
-        } else {
-          // If no more proxies to try
-          if (loadMoreBtn) {
-            loadMoreBtn.textContent = 'Error loading more results. Click to try again.';
-            loadMoreBtn.disabled = false;
-          }
+        if (loadMoreBtn) {
+          loadMoreBtn.textContent = 'Error loading more results. Click to try again.';
+          loadMoreBtn.disabled = false;
         }
       });
   }
