@@ -409,6 +409,39 @@ document.addEventListener('DOMContentLoaded', function() {
     // Use spaces between project directives
     return projects.map(project => `project:${project}`).join(' ');
   }
+
+  function getPageNumber(url) {
+    if (!url) {
+      return null;
+    }
+
+    try {
+      const parsedUrl = new URL(url);
+      const pageParam = parsedUrl.searchParams.get('page');
+      return pageParam ? parseInt(pageParam, 10) : 1;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function getRemainingPages(data) {
+    if (!data.next || !data.results || data.results.length === 0) {
+      return 0;
+    }
+
+    // Read the Docs returns a `next` URL with the following page number.
+    // Use that plus the current page's actual result count so the counter
+    // decreases by exactly one page for each successful click.
+    const nextPageNumber = getPageNumber(data.next);
+    if (!nextPageNumber || nextPageNumber < 2) {
+      return 0;
+    }
+
+    const currentPageNumber = nextPageNumber - 1;
+    const pageSize = data.results.length;
+    const remainingResults = Math.max(data.count - (currentPageNumber * pageSize), 0);
+    return Math.ceil(remainingResults / pageSize);
+  }
   
   // Store recently clicked search results
   const recentSearches = {
@@ -749,12 +782,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Add pagination if needed
     if (data.next) {
-      // Calculate remaining pages
-      // Each page has at most 50 results
-      const currentResultsCount = Object.values(resultsByProject).flat().length;
-      const totalResultsCount = data.count;
-      const remainingResults = totalResultsCount - currentResultsCount;
-      const remainingPages = Math.ceil(remainingResults / 50);
+      const remainingPages = getRemainingPages(data);
       
       const loadMoreBtn = document.createElement('button');
       loadMoreBtn.className = 'pyhc-load-more';
@@ -990,10 +1018,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Add pagination if needed
     if (data.next) {
-      const currentResultsCount = Array.from(resultsContainer.querySelectorAll('.project-results .hit-block')).length;
-      const totalResultsCount = data.count;
-      const remainingResults = totalResultsCount - currentResultsCount;
-      const remainingPages = Math.ceil(remainingResults / 50);
+      const remainingPages = getRemainingPages(data);
 
       const newLoadMoreBtn = document.createElement('button');
       newLoadMoreBtn.className = 'pyhc-load-more';
