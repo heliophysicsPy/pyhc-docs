@@ -73,6 +73,7 @@ pyhc_projects = [
     'pycdfpp',
     'pydarn',
     'pyflct',
+    'pyintensityfeatures',
     'pyrfu',
     'pytplot',
     'regularizepsf',

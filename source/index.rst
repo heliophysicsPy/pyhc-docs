@@ -42,6 +42,7 @@ Below are the currently available packages in this hub. Click on a package name 
 - `PyCDFpp <https://pycdfpp.readthedocs.io/en/latest/>`_ - A fast and easy to use C++ CDF library with Python bindings.
 - `pyDARN <https://pydarn.readthedocs.io/en/main/>`_ - Python data visualization library for the Super Dual Auroral Radar Network.
 - `pyflct <https://pyflct.readthedocs.io>`_ - A Python wrapper for Fourier Local Correlation Tracking.
+- `pyIntensityFeatures <https://pyintensityfeatures.readthedocs.io/en/latest/>`_ - A tool to identify features, such as auroral luminosity boundaries, in imager data.
 - `PyRFU <https://pyrfu.readthedocs.io/en/latest/>`_ - PyRFU is a free and open-source Python package for advanced analysis of in-situ space plasma data.
 - `PyTplot <https://pytplot.readthedocs.io/en/latest/>`_ - Based on IDL tplot, plots and manipulates time series data.
 - `regularizePSF <https://regularizepsf.readthedocs.io/en/latest/>`_ - A Python package for manipulating and correcting various point spread functions.
