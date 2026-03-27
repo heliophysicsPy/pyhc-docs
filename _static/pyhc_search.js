@@ -33,25 +33,61 @@ document.addEventListener('DOMContentLoaded', function() {
   // Base API URL with public CORS proxy services
   const rtdApiUrl = 'https://readthedocs.org/api/v3/search/';
   
-  // List of CORS proxies to try (in order of preference)
+  // List of CORS proxies to try (in order of preference).
+  // Different services expect different URL formats, so each proxy gets its own builder.
+  //
+  // Long-term fix:
+  // Public CORS proxies are brittle, rate-limited, and can disappear without warning.
+  // The best durable solution is to replace this list with a single proxy endpoint
+  // controlled by PyHC, for example a tiny serverless proxy deployed outside this
+  // static site (such as a Cloudflare Worker on workers.dev or a custom domain).
+  // That setup cannot be created from inside this repo alone, so this client keeps
+  // a fallback list for now.
   const corsProxies = [
-    'https://corsproxy.io/?',
-    'https://cors-anywhere.herokuapp.com/',
-    'https://api.allorigins.win/raw?url='
+    {
+      name: 'CodeTabs',
+      buildUrl: targetUrl => `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(targetUrl)}`
+    },
+    {
+      name: 'allOrigins',
+      buildUrl: targetUrl => `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`
+    },
+    {
+      name: 'crossorigin.me',
+      buildUrl: targetUrl => `https://crossorigin.me/${targetUrl}`
+    }
   ];
   
-  // Start with the first proxy
+  // Start with the first proxy, but remember the last successful one.
   let currentProxyIndex = 0;
-  const corsProxyUrl = corsProxies[currentProxyIndex];
-  let apiBaseUrl = corsProxyUrl + encodeURIComponent(rtdApiUrl);
-  
-  // Function to switch to the next proxy if one fails
-  function switchToNextProxy() {
-    currentProxyIndex = (currentProxyIndex + 1) % corsProxies.length;
-    const nextProxy = corsProxies[currentProxyIndex];
-    apiBaseUrl = nextProxy + encodeURIComponent(rtdApiUrl);
-    console.log(`Switched to CORS proxy: ${nextProxy}`);
-    return apiBaseUrl;
+
+  async function fetchSearchResults(targetUrl) {
+    let lastError = null;
+
+    for (let attempt = 0; attempt < corsProxies.length; attempt++) {
+      const proxyIndex = (currentProxyIndex + attempt) % corsProxies.length;
+      const proxy = corsProxies[proxyIndex];
+
+      if (attempt > 0) {
+        showMessage('Trying alternative proxy service... Please wait.');
+      }
+
+      try {
+        const response = await fetch(proxy.buildUrl(targetUrl));
+
+        if (!response.ok) {
+          throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
+        }
+
+        currentProxyIndex = proxyIndex;
+        return await response.json();
+      } catch (error) {
+        lastError = error;
+        console.error(`Search error with proxy ${proxy.name}:`, error);
+      }
+    }
+
+    throw lastError || new Error('Search failed for all configured proxy services.');
   }
   
   // Modal elements (will be defined after createSearchModal)
@@ -472,60 +508,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // Build the query parameter
     const queryParam = `q=${encodeURIComponent(fullQuery)}`;
     
-    // When using corsproxy.io, we need to add the query parameter to the encoded URL
-    const queryUrl = `${apiBaseUrl}${encodeURIComponent('?' + queryParam)}`;
-    
-    // Fetch results
-    fetch(queryUrl)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
-        }
-        return response.json();
-      })
+    const targetUrl = `${rtdApiUrl}?${queryParam}`;
+
+    fetchSearchResults(targetUrl)
       .then(data => {
         // Reset search icon to magnifying glass
         resetSearchIcon();
         displayResults(data, query);
       })
-      .catch(error => {
-        console.error("Search error:", error);
-        
-        // Check if we've tried all proxies
-        if (corsProxies.length > 1) {
-          // Try with next proxy
-          switchToNextProxy();
-          
-          // Update the query URL with the new proxy
-          const newQueryUrl = `${apiBaseUrl}${encodeURIComponent('?' + queryParam)}`;
-          
-          // Show a trying alternative proxy message
-          showMessage(`Trying alternative proxy service... Please wait.`);
-          
-          // Retry the search with the new proxy
-          setTimeout(() => {
-            fetch(newQueryUrl)
-              .then(response => {
-                if (!response.ok) {
-                  throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
-                }
-                return response.json();
-              })
-              .then(data => {
-                resetSearchIcon();
-                displayResults(data, query);
-              })
-              .catch(retryError => {
-                // If all proxies fail, show error message
-                resetSearchIcon();
-                showMessage(`Search failed. The search service may be temporarily unavailable. Please try again later.`);
-              });
-          }, 1000);
-        } else {
-          // Reset search icon to magnifying glass
-          resetSearchIcon();
-          showMessage(`An error occurred while searching: ${error.message}. Please try again later.`);
-        }
+      .catch(() => {
+        resetSearchIcon();
+        showMessage('Search failed. The search service may be temporarily unavailable. Please try again later.');
       });
   }
   
