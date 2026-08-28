@@ -66,6 +66,7 @@ pyhc_projects = [
     'irispy-lmsal',
     'kaipy-docs',
     'lofarsun',
+    'madrigalweb',
     'mcalf',
     'ndcube',
     'ocbpy',
